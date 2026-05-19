@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,9 +25,14 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     // for all authenticated users
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard');
+
+    // //only for customer
+    // Route::middleware(['role:customer'])->group(function () {
+    //     Route::get('/dashboard', function () {
+    //         return view('dashboard');
+    //     })->name('dashboard');
+    // });
 
     // for admin only
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
