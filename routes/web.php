@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\VendorProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,9 +44,10 @@ Route::middleware('auth')->group(function () {
 
     // for vendor only
     Route::middleware(['role:vendor'])->prefix('vendor')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('vendor.dashboard');
-        })->name('vendor.dashboard');
+        Route::get('/dashboard', [VendorProductController::class, 'index'])->name('vendor.dashboard');
+
+        Route::get('/product/create', [VendorProductController::class, 'create'])->name('vendor.product.create');
+        Route::post('/product/store', [VendorProductController::class, 'store'])->name('vendor.product.store');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
