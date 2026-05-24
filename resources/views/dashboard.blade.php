@@ -125,7 +125,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             @forelse($products as $product)
-            
+            <a href="{{ route('products.show', $product->id) }}" class="block">
                 <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 rounded-2xl flex flex-col justify-between transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden relative">
                     
                     <div class="w-full h-48 bg-gray-100 dark:bg-gray-700 relative flex items-center justify-center border-b border-gray-200 dark:border-gray-700/70 overflow-hidden flex-shrink-0">
