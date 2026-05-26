@@ -17,4 +17,9 @@ class Product extends Model
         'stock',
         'user_id', // Vendor ID
     ];
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 }

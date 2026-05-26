@@ -28,6 +28,9 @@ Route::middleware('auth')->group(function () {
     // for all authenticated users
     Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard');
 
+    // for Product Detail 
+    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+
     // //only for customer
     // Route::middleware(['role:customer'])->group(function () {
     //     Route::get('/dashboard', function () {
