@@ -22,6 +22,11 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'vendor_status',
+        'shop_name',
+        'shop_description',
+        'shop_phone',
+        'payment_slip',
     ];
 
     /**
@@ -32,6 +37,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'payment_slip',
     ];
 
     /**
@@ -43,5 +49,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'role' => 'string',
+        'vendor_status' => 'string',
+        'shop_name' => 'string',
+        'shop_description' => 'string',
+        'shop_phone' => 'string',
+        'payment_slip' => 'string',
     ];
 }

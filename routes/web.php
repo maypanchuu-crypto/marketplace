@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\VendorProductController;
+use App\Http\Controllers\VendorRegistrationController;
+use App\Http\Controllers\AdminVendorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,9 +30,6 @@ Route::middleware('auth')->group(function () {
     // for all authenticated users
     Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard');
 
-    // for Product Detail 
-    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
-
     // //only for customer
     // Route::middleware(['role:customer'])->group(function () {
     //     Route::get('/dashboard', function () {
@@ -43,6 +42,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
+
+        // Admin Vendor Requests Routes
+        Route::get('/vendor-requests', [AdminVendorController::class, 'index'])->name('admin.vendor.requests');
+        Route::post('/vendor-requests/{id}/approve', [AdminVendorController::class, 'approve'])->name('admin.vendor.approve');
+        Route::post('/vendor-requests/{id}/reject', [AdminVendorController::class, 'reject'])->name('admin.vendor.reject');
     });
 
     // for vendor only
@@ -56,6 +60,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // for Product Detail 
+    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+
+    // Vendor Registration Routes
+    Route::get('/vendor-register', [VendorRegistrationController::class, 'index'])->name('vendor.register');
+    Route::post('/vendor-register', [VendorRegistrationController::class, 'register'])->name('vendor.register.submit');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
