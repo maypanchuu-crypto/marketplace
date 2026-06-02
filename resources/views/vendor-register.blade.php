@@ -200,14 +200,34 @@
                         @enderror
                     </div>
 
+                    <!-- Payment Slip Upload Input (Image Preview) -->
                     <div>
                         <label for="payment_slip"
                             class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Upload
                             Payment Slip (Screenshot)</label>
+
                         <input type="file" id="payment_slip" name="payment_slip" accept="image/*"
+                            onchange="previewImage(event)"
                             class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-gray-700 dark:file:text-gray-200 hover:file:bg-blue-100 border border-dashed border-gray-300 dark:border-gray-600 p-2 rounded-xl bg-gray-50/50 dark:bg-gray-700/30 @error('payment_slip') border-rose-500 @enderror">
-                        @error('payment_slip') <p class="text-rose-500 text-[11px] mt-1 font-medium">{{ $message }}</p>
+
+                        @error('payment_slip')
+                            <p class="text-rose-500 text-[11px] mt-1 font-medium">{{ $message }}</p>
                         @enderror
+
+                        <!-- Image Preview Area -->
+                        <div id="previewContainer"
+                            class="mt-4 hidden relative w-48 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-gray-100 dark:bg-gray-800 p-1">
+                            <img id="imagePreview" src="#" alt="Payment Slip Preview"
+                                class="w-full h-auto object-contain rounded-lg">
+
+                            <!-- to delete image -->
+                            <button type="button" onclick="removeImage()"
+                                class="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1 rounded-full transition-all">
+                                <svg class="w-4 4-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="pt-2">
@@ -288,6 +308,33 @@
         };
         if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
         if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+        function previewImage(event) {
+            const input = event.target;
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.classList.remove('hidden'); // Hidden ကို ဖြုတ်ပြီး ပုံပြ
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            const input = document.getElementById('payment_slip');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+
+            input.value = ""; // Input ထဲက ဖိုင်ဖျက်
+            imagePreview.src = "#";
+            previewContainer.classList.add('hidden'); // ပြန်ဖျောက်
+        }
     </script>
 </body>
 
