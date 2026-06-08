@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('price', 10, 2); // eg. 99999999.99
+            $table->integer('price'); 
             $table->string('image')->nullable(); // store the main image path
             $table->integer('stock')->default(0); // inventory management
         
-            // ဘယ် Vendor တင်လိုက်တာလဲဆိုတာ သိဖို့ (Foreign Key)
+            // to know which vendor added the product (Foreign Key)
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });

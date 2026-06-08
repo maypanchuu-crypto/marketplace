@@ -3,9 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\VendorProductController;
 use App\Http\Controllers\VendorRegistrationController;
 use App\Http\Controllers\AdminVendorController;
+use App\Http\Controllers\VendorDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,10 +51,18 @@ Route::middleware('auth')->group(function () {
 
     // for vendor only
     Route::middleware(['role:vendor'])->prefix('vendor')->group(function () {
-        Route::get('/dashboard', [VendorProductController::class, 'index'])->name('vendor.dashboard');
+        Route::get('/dashboard', [VendorDashboardController::class, 'index'])->name('vendor.dashboard');
 
-        Route::get('/product/create', [VendorProductController::class, 'create'])->name('vendor.product.create');
-        Route::post('/product/store', [VendorProductController::class, 'store'])->name('vendor.product.store');
+        // for product creation by vendor
+        Route::get('/product/create', [VendorDashboardController::class, 'createProduct'])->name('vendor.product.create');
+        Route::post('/product/store', [VendorDashboardController::class, 'storeProduct'])->name('vendor.product.store');
+
+        // for product editing by vendor
+        Route::get('/products/{id}/edit', [VendorDashboardController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{id}', [VendorDashboardController::class, 'update'])->name('products.update');
+
+        // for product deleting by vendor
+        Route::delete('/products/{id}', [VendorDashboardController::class, 'destroy'])->name('products.destroy');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -68,5 +76,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/vendor-register', [VendorRegistrationController::class, 'index'])->name('vendor.register');
     Route::post('/vendor-register', [VendorRegistrationController::class, 'register'])->name('vendor.register.submit');
 });
+
 
 require __DIR__ . '/auth.php';

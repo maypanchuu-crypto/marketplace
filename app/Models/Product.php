@@ -18,6 +18,12 @@ class Product extends Model
         'user_id', // Vendor ID
     ];
 
+    // to call the vendor who added the product
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function images()
     {
         return $this->hasMany(ProductImage::class);

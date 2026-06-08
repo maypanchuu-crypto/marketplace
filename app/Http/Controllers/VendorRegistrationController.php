@@ -11,9 +11,9 @@ class VendorRegistrationController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->role === 'vendor') {
-            return redirect()->route('dashboard')->with('info', 'You are already a vendor.');
-        }
+        // if ($user->role === 'vendor') {
+        //     return redirect()->route('dashboard')->with('info', 'You are already a vendor.');
+        // }
         return view('vendor-register', compact('user'));
     }
 
