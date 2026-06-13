@@ -126,6 +126,7 @@
                             class="bg-gray-50 dark:bg-gray-700/50 text-gray-400 font-bold uppercase text-[11px] tracking-wider border-b dark:border-gray-700">
                             <th class="p-4">Applicant</th>
                             <th class="p-4">Shop Name</th>
+                            <th class="p-4">Email</th>
                             <th class="p-4">Phone</th>
                             <th class="p-4">Description</th>
                             <th class="p-4">Payment Slip</th>
@@ -138,6 +139,7 @@
                                 <td class="p-4 font-semibold text-gray-900 dark:text-white">{{ $req->name }}<br><span
                                         class="text-xs text-gray-400 font-normal">{{ $req->email }}</span></td>
                                 <td class="p-4 font-bold text-blue-600 dark:text-blue-400">{{ $req->shop_name }}</td>
+                                <td class="p-4 text-gray-600 dark:text-gray-300">{{ $req->email }}</td>
                                 <td class="p-4 text-gray-600 dark:text-gray-300">{{ $req->shop_phone }}</td>
                                 <td class="p-4 text-gray-500 dark:text-gray-400 max-w-xs truncate"
                                     title="{{ $req->shop_description }}">{{ $req->shop_description }}</td>

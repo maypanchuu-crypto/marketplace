@@ -15,6 +15,8 @@ class Product extends Model
         'price',
         'image',
         'stock',
+        'sizes',
+        'colors',
         'user_id', // Vendor ID
     ];
 

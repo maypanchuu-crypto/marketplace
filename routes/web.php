@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\VendorRegistrationController;
 use App\Http\Controllers\AdminVendorController;
 use App\Http\Controllers\VendorDashboardController;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,6 +77,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/vendor-register', [VendorRegistrationController::class, 'index'])->name('vendor.register');
     Route::post('/vendor-register', [VendorRegistrationController::class, 'register'])->name('vendor.register.submit');
 });
+
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+Route::patch('/update-cart', [CartController::class, 'updateCart'])->name('cart.update');
+Route::delete('/remove-from-cart', [CartController::class, 'removeCart'])->name('cart.remove');
 
 
 require __DIR__ . '/auth.php';

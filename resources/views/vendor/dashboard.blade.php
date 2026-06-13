@@ -212,6 +212,33 @@
                 </span>
             </div>
 
+            @if(session('success'))
+                <div id="successAlert"
+                    class="mb-4 p-4 text-sm text-green-800 rounded-xl bg-green-50 dark:bg-gray-800 dark:text-green-400 border border-green-200 dark:border-green-800 flex items-center justify-between gap-2 transition-all duration-300"
+                    role="alert">
+
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <span class="font-bold">အောင်မြင်သည်!</span> {{ session('success') }}
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="dismissAlert()"
+                        class="text-green-500 hover:bg-green-100 dark:hover:bg-gray-700 p-1 rounded-lg transition duration-200"
+                        aria-label="Close">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                </div>
+            @endif
+
             <div
                 class="mb-6 flex flex-wrap gap-4 items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
 
@@ -412,7 +439,9 @@
                     <label
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Description</label>
                     <textarea name="description" id="edit_description" rows="3"
-                        class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </textarea>               
+                    
                 </div>
 
                 <div>
@@ -485,7 +514,21 @@
     if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
     if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
-    
+
+    function dismissAlert() {
+        const alertBox = document.getElementById('successAlert');
+        if (alertBox) {
+            // ပျောက်ကွယ်သွားတဲ့ Animation ပုံစံလေးဖြစ်အောင် အလင်းမှိန်ပြီး အပေါ်ကို ကျုံ့ဝင်သွားစေခြင်း
+            alertBox.style.opacity = '0';
+            alertBox.style.transform = 'translateY(-10px)';
+
+            // Animation ပြီးမှ Element ကို HTML ပေါ်ကနေ လုံးဝဖယ်ထုတ်ပစ်ခြင်း
+            setTimeout(() => {
+                alertBox.remove();
+            }, 300);
+        }
+    }
+
     function openEditModal(productId) {
         const modal = document.getElementById('editProductModal');
         const form = document.getElementById('editProductForm');
@@ -500,13 +543,38 @@
                 return response.json();
             })
             .then(data => {
+                // လက်ရှိရှိပြီးသား fields များ ဖြည့်သွင်းခြင်း
                 document.getElementById('edit_name').value = data.name;
                 document.getElementById('edit_price').value = data.price;
                 document.getElementById('edit_stock').value = data.stock;
                 document.getElementById('edit_description').value = data.description || '';
 
+                // 💡 Sizes JSON ကို Array ပြောင်းပြီး Comma ဖြင့် ခွဲကာ Input ထဲထည့်ခြင်း
+                if (data.sizes) {
+                    try {
+                        const sizesArray = JSON.parse(data.sizes);
+                        document.getElementById('edit_sizes').value = Array.isArray(sizesArray) ? sizesArray.join(', ') : data.sizes;
+                    } catch (e) {
+                        document.getElementById('edit_sizes').value = data.sizes;
+                    }
+                } else {
+                    document.getElementById('edit_sizes').value = '';
+                }
+
+                // 💡 Colors JSON ကို Array ပြောင်းပြီး Comma ဖြင့် ခွဲကာ Input ထဲထည့်ခြင်း
+                if (data.colors) {
+                    try {
+                        const colorsArray = JSON.parse(data.colors);
+                        document.getElementById('edit_colors').value = Array.isArray(colorsArray) ? colorsArray.join(', ') : data.colors;
+                    } catch (e) {
+                        document.getElementById('edit_colors').value = data.colors;
+                    }
+                } else {
+                    document.getElementById('edit_colors').value = '';
+                }
+
                 modal.classList.remove('hidden');
-                modal.classList.add('flex'); // Tailwind flexbox စနစ်ဖြင့် Center ကျအောင်
+                modal.classList.add('flex');
             })
             .catch(error => {
                 console.error('Error fetching product:', error);
@@ -517,11 +585,11 @@
     function closeEditModal() {
         document.getElementById('editProductModal').classList.add('hidden');
     }
-    
+
     function confirmDelete(productId) {
         if (confirm("Are you sure you want to delete this product? This action cannot be undone.")) {
             const form = document.getElementById('deleteProductForm');
-            
+
             form.action = `/vendor/products/${productId}`;
 
             form.submit();

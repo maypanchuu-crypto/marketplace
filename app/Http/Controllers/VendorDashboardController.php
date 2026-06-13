@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
+use App\Models\ProductImage;
 
 class VendorDashboardController extends Controller
 {
@@ -49,6 +50,7 @@ class VendorDashboardController extends Controller
 
 
     // store the new product in the database
+    // store the new product in the database
     public function storeProduct(Request $request)
     {
         $request->validate([
@@ -56,24 +58,62 @@ class VendorDashboardController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'description' => 'required|string|min:5',
-            'product_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // Max 2MB
+            'sizes' => 'nullable|string', // 💡 Size အတွက် Validation ထည့်မယ်
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'image_colors' => 'nullable|array',
         ]);
 
-        $productData = [
-            'user_id' => Auth::id(), // current vendor ID
+        $coverImagePath = null;
+        if ($request->hasFile('images')) {
+            $coverImagePath = $request->file('images')[0]->store('products', 'public');
+        }
+
+        // 💡 ဝင်လာတဲ့ Sizes စာသားကို Comma ခံပြီး ဖြတ်ပြီး Array ပြောင်းမည့် Logic
+        $sizesArray = null;
+        if ($request->filled('sizes')) {
+            $sizesArray = array_map('trim', explode(',', strtolower($request->sizes)));
+        }
+
+        $colorsArray = [];
+        if ($request->has('image_colors')) {
+            foreach ($request->image_colors as $color) {
+                if (!empty($color)) {
+                    $colorsArray[] = strtolower(trim($color));
+                }
+            }
+        }
+        $colorsArray = array_unique($colorsArray);
+
+        // Product ကို Database ထဲ သိမ်းခြင်း
+        $product = Product::create([
+            'user_id' => Auth::id(),
             'name' => $request->name,
             'price' => $request->price,
             'stock' => $request->stock,
             'description' => $request->description,
-        ];
+            'image' => $coverImagePath,
+            'sizes' => $sizesArray ? json_encode($sizesArray) : null, // 💡 JSON စစ်စစ်အဖြစ် ဝင်သွားပါပြီ
+            'colors' => !empty($colorsArray) ? json_encode(array_values($colorsArray)) : null,
+        ]);
 
-        // store product image at public/products 
-        if ($request->hasFile('product_image')) {
-            $path = $request->file('product_image')->store('products', 'public');
-            $productData['image'] = $path;
+        // ၅။ ပုံအားလုံးကို `product_images` table ထဲ တစ်ပုံချင်းစီ သွားသိမ်းပြီး ၎င်းနဲ့ဆိုင်တဲ့ အရောင်ကို တွဲပေးမယ်
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $file) {
+                if ($file->isValid()) {
+                    $path = $file->store('products/gallery', 'public');
+
+                    // ရိုက်ထည့်လိုက်တဲ့ အရောင်တွေထဲက လက်ရှိ ပုံရဲ့ Index နဲ့ ကိုက်ညီတဲ့ အရောင်ကို ယူမယ်
+                    $associatedColor = isset($request->image_colors[$index]) ? strtolower(trim($request->image_colors[$index])) : null;
+
+                    \App\Models\ProductImage::create([
+                        'product_id' => $product->id,
+                        'image_path' => $path,
+                        'color' => !empty($associatedColor) ? $associatedColor : null,
+                    ]);
+                }
+            }
         }
-
-        Product::create($productData);
 
         return redirect()->route('vendor.dashboard')->with('success', 'Product uploaded successfully!');
     }
@@ -98,14 +138,22 @@ class VendorDashboardController extends Controller
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'sizes' => 'nullable|string',
+            'colors' => 'nullable|string', // ဒါလေးပါ ထည့်စစ်ပေးပါ
         ]);
 
         $data = $request->only(['name', 'price', 'stock', 'description']);
 
-        // store new image if uploaded and delete the old one from storage
+        // မင်းရေးထားတဲ့ ကုတ်အတိုင်း Comma (,) ခံပြီး ရိုက်လိုက်တဲ့စာတွေကို Array ပြောင်းတာပါ
+        $sizesArray = $request->sizes ? array_map('trim', explode(',', $request->sizes)) : null;
+        $colorsArray = $request->colors ? array_map('trim', explode(',', $request->colors)) : null;
+
+        $data['sizes'] = $sizesArray ? json_encode($sizesArray) : null;
+        $data['colors'] = $colorsArray ? json_encode($colorsArray) : null;
+
         if ($request->hasFile('image')) {
             if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+                \Storage::disk('public')->delete($product->image);
             }
             $data['image'] = $request->file('image')->store('products', 'public');
         }
