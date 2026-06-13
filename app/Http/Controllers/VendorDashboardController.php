@@ -58,7 +58,7 @@ class VendorDashboardController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'description' => 'required|string|min:5',
-            'sizes' => 'nullable|string', // 💡 Size အတွက် Validation ထည့်မယ်
+            'sizes' => 'nullable|string', 
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             'image_colors' => 'nullable|array',
@@ -69,7 +69,6 @@ class VendorDashboardController extends Controller
             $coverImagePath = $request->file('images')[0]->store('products', 'public');
         }
 
-        // 💡 ဝင်လာတဲ့ Sizes စာသားကို Comma ခံပြီး ဖြတ်ပြီး Array ပြောင်းမည့် Logic
         $sizesArray = null;
         if ($request->filled('sizes')) {
             $sizesArray = array_map('trim', explode(',', strtolower($request->sizes)));
@@ -85,7 +84,6 @@ class VendorDashboardController extends Controller
         }
         $colorsArray = array_unique($colorsArray);
 
-        // Product ကို Database ထဲ သိမ်းခြင်း
         $product = Product::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
@@ -97,13 +95,11 @@ class VendorDashboardController extends Controller
             'colors' => !empty($colorsArray) ? json_encode(array_values($colorsArray)) : null,
         ]);
 
-        // ၅။ ပုံအားလုံးကို `product_images` table ထဲ တစ်ပုံချင်းစီ သွားသိမ်းပြီး ၎င်းနဲ့ဆိုင်တဲ့ အရောင်ကို တွဲပေးမယ်
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $file) {
                 if ($file->isValid()) {
                     $path = $file->store('products/gallery', 'public');
 
-                    // ရိုက်ထည့်လိုက်တဲ့ အရောင်တွေထဲက လက်ရှိ ပုံရဲ့ Index နဲ့ ကိုက်ညီတဲ့ အရောင်ကို ယူမယ်
                     $associatedColor = isset($request->image_colors[$index]) ? strtolower(trim($request->image_colors[$index])) : null;
 
                     \App\Models\ProductImage::create([
@@ -122,7 +118,9 @@ class VendorDashboardController extends Controller
     // edit product data and show the form with existing data
     public function edit($id)
     {
-        $product = Product::where('user_id', auth()->id())->findOrFail($id);
+        $product = Product::where('user_id', auth()->id())
+            ->with('images')
+            ->findOrFail($id);
         return response()->json($product);
     }
 
@@ -137,30 +135,72 @@ class VendorDashboardController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'sizes' => 'nullable|string',
-            'colors' => 'nullable|string', // ဒါလေးပါ ထည့်စစ်ပေးပါ
+            'colors' => 'nullable|string',
+            'new_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $data = $request->only(['name', 'price', 'stock', 'description']);
+        $sizesArray = $request->sizes ? array_map('trim', explode(',', strtolower($request->sizes))) : null;
 
-        // မင်းရေးထားတဲ့ ကုတ်အတိုင်း Comma (,) ခံပြီး ရိုက်လိုက်တဲ့စာတွေကို Array ပြောင်းတာပါ
-        $sizesArray = $request->sizes ? array_map('trim', explode(',', $request->sizes)) : null;
-        $colorsArray = $request->colors ? array_map('trim', explode(',', $request->colors)) : null;
+        $mainColors = $request->colors ? array_map('trim', explode(',', strtolower($request->colors))) : [];
 
-        $data['sizes'] = $sizesArray ? json_encode($sizesArray) : null;
-        $data['colors'] = $colorsArray ? json_encode($colorsArray) : null;
+        if ($request->has('existing_image_colors')) {
+            foreach ($request->existing_image_colors as $imageId => $colorValue) {
+                if (!empty($colorValue)) {
+                    $cleanedColor = strtolower(trim($colorValue));
+                    \App\Models\ProductImage::where('id', $imageId)
+                        ->where('product_id', $product->id)
+                        ->update(['color' => $cleanedColor]);
 
-        if ($request->hasFile('image')) {
-            if ($product->image) {
-                \Storage::disk('public')->delete($product->image);
+                    $mainColors[] = $cleanedColor; 
+                } else {
+                    \App\Models\ProductImage::where('id', $imageId)
+                        ->where('product_id', $product->id)
+                        ->update(['color' => null]);
+                }
             }
-            $data['image'] = $request->file('image')->store('products', 'public');
         }
 
-        $product->update($data);
+        if ($request->has('delete_images')) {
+            foreach ($request->delete_images as $imageId) {
+                $img = \App\Models\ProductImage::where('id', $imageId)->where('product_id', $product->id)->first();
+                if ($img) {
+                    \Storage::disk('public')->delete($img->image_path);
+                    $img->delete();
+                }
+            }
+        }
 
-        return redirect()->back()->with('success', 'Product updated successfully!');
+        if ($request->hasFile('new_images')) {
+            foreach ($request->file('new_images') as $index => $imageFile) {
+                $path = $imageFile->store('products/gallery', 'public');
+
+                $color = isset($request->new_image_colors[$index]) ? strtolower(trim($request->new_image_colors[$index])) : null;
+
+                \App\Models\ProductImage::create([
+                    'product_id' => $product->id,
+                    'image_path' => $path,
+                    'color' => !empty($color) ? $color : null
+                ]);
+
+                if (!empty($color)) {
+                    $mainColors[] = $color; 
+                }
+            }
+        }
+
+        $mainColors = array_values(array_unique(array_filter($mainColors)));
+
+        $product->update([
+            'name' => $request->name,
+            'price' => $request->price,
+            'stock' => $request->stock,
+            'description' => $request->description,
+            'sizes' => $sizesArray ? json_encode($sizesArray) : null,
+            'colors' => !empty($mainColors) ? json_encode($mainColors) : null, // 👈 ဒီမှာ Database ထဲ စနစ်တကျ ဝင်သွားပါပြီ
+        ]);
+
+        return redirect()->back()->with('success', 'Product and image variations updated successfully!');
     }
 
     public function destroy($id)

@@ -440,16 +440,44 @@
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Description</label>
                     <textarea name="description" id="edit_description" rows="3"
                         class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </textarea>               
-                    
+                    </textarea>
+
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Product Image
-                        (Optional)</label>
-                    <input type="file" name="image"
-                        class="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-gray-700 dark:file:text-gray-200">
-                    <p class="text-[10px] text-gray-400 mt-1">Leave empty to keep the current image.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Available
+                            Sizes</label>
+                        <input type="text" name="sizes" id="edit_sizes" placeholder="e.g. S, M, L"
+                            class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <!-- <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Available
+                            Colors</label>
+                        <input type="text" name="colors" id="edit_colors" placeholder="e.g. Red, Black"
+                            class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"> -->
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">Current
+                        Images & Colors</label>
+                    <div id="edit_existing_images_container"
+                        class="grid grid-cols-2 gap-3 bg-gray-100 dark:bg-gray-700/30 p-3 rounded-xl border dark:border-gray-700">
+                    </div>
+                </div>
+
+                <div class="mt-4 border-t dark:border-gray-700 pt-4">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">📸 Add More
+                        Images & Colors (Optional)</label>
+                    <input type="file" name="new_images[]" id="edit_new_images" multiple
+                        onchange="previewNewImagesInModal(event)"
+                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 dark:bg-gray-700 dark:border-gray-600"
+                        accept="image/*">
+
+                    <div id="edit_new_images_preview"
+                        class="mt-3 hidden grid grid-cols-2 gap-3 bg-blue-50/50 dark:bg-gray-700/20 p-3 rounded-xl border border-dashed border-blue-300">
+                    </div>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2">
@@ -518,11 +546,9 @@
     function dismissAlert() {
         const alertBox = document.getElementById('successAlert');
         if (alertBox) {
-            // ပျောက်ကွယ်သွားတဲ့ Animation ပုံစံလေးဖြစ်အောင် အလင်းမှိန်ပြီး အပေါ်ကို ကျုံ့ဝင်သွားစေခြင်း
             alertBox.style.opacity = '0';
             alertBox.style.transform = 'translateY(-10px)';
 
-            // Animation ပြီးမှ Element ကို HTML ပေါ်ကနေ လုံးဝဖယ်ထုတ်ပစ်ခြင်း
             setTimeout(() => {
                 alertBox.remove();
             }, 300);
@@ -532,54 +558,113 @@
     function openEditModal(productId) {
         const modal = document.getElementById('editProductModal');
         const form = document.getElementById('editProductForm');
+        const existingContainer = document.getElementById('edit_existing_images_container');
+        const newPreviewContainer = document.getElementById('edit_new_images_preview');
+
+        editModalFilesArray = [];
+
+        existingContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-2 text-center">Loading images...</p>';
+        newPreviewContainer.innerHTML = '';
+        newPreviewContainer.classList.add('hidden');
+        document.getElementById('edit_new_images').value = '';
 
         form.action = `/vendor/products/${productId}`;
 
         fetch(`/vendor/products/${productId}/edit`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Product resource not found');
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                // လက်ရှိရှိပြီးသား fields များ ဖြည့်သွင်းခြင်း
                 document.getElementById('edit_name').value = data.name;
                 document.getElementById('edit_price').value = data.price;
                 document.getElementById('edit_stock').value = data.stock;
                 document.getElementById('edit_description').value = data.description || '';
+                document.getElementById('edit_sizes').value = data.sizes ? JSON.parse(data.sizes).join(', ') : '';
+                //document.getElementById('edit_colors').value = data.colors ? JSON.parse(data.colors).join(', ') : '';
 
-                // 💡 Sizes JSON ကို Array ပြောင်းပြီး Comma ဖြင့် ခွဲကာ Input ထဲထည့်ခြင်း
-                if (data.sizes) {
-                    try {
-                        const sizesArray = JSON.parse(data.sizes);
-                        document.getElementById('edit_sizes').value = Array.isArray(sizesArray) ? sizesArray.join(', ') : data.sizes;
-                    } catch (e) {
-                        document.getElementById('edit_sizes').value = data.sizes;
-                    }
+                existingContainer.innerHTML = '';
+                if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+                    data.images.forEach(img => {
+                        const div = document.createElement('div');
+                        div.className = 'p-2 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-600 flex flex-col gap-1.5 relative';
+                        div.innerHTML = `
+            <div class="aspect-video w-full rounded overflow-hidden border">
+                <img src="/storage/${img.image_path}" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <input type="text" name="existing_image_colors[${img.id}]" value="${img.color || ''}" 
+                    placeholder="Color" class="w-full px-2 py-1 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded text-[11px] focus:outline-none dark:text-white">
+            </div>
+            <label class="flex items-center gap-1 mt-1 text-[10px] text-rose-500 font-medium cursor-pointer">
+                <input type="checkbox" name="delete_images[]" value="${img.id}" class="rounded text-rose-600 focus:ring-rose-500"> Delete photo
+            </label>
+        `;
+                        existingContainer.appendChild(div);
+                    });
                 } else {
-                    document.getElementById('edit_sizes').value = '';
+                    existingContainer.innerHTML = '<p class="text-xs text-gray-400 col-span-2 text-center py-2">No gallery images uploaded for this product.</p>';
                 }
-
-                // 💡 Colors JSON ကို Array ပြောင်းပြီး Comma ဖြင့် ခွဲကာ Input ထဲထည့်ခြင်း
-                if (data.colors) {
-                    try {
-                        const colorsArray = JSON.parse(data.colors);
-                        document.getElementById('edit_colors').value = Array.isArray(colorsArray) ? colorsArray.join(', ') : data.colors;
-                    } catch (e) {
-                        document.getElementById('edit_colors').value = data.colors;
-                    }
-                } else {
-                    document.getElementById('edit_colors').value = '';
-                }
-
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
-            })
-            .catch(error => {
-                console.error('Error fetching product:', error);
-                alert('Something went wrong while fetching product details. Please try again later.');
             });
+    }
+
+    let editModalFilesArray = [];
+
+    function previewNewImagesInModal(event) {
+        const input = event.target;
+        const container = document.getElementById('edit_new_images_preview');
+
+        if (input.files && input.files.length > 0) {
+            Array.from(input.files).forEach(file => {
+                editModalFilesArray.push(file);
+            });
+        }
+
+        renderEditModalPreviews();
+    }
+
+    function renderEditModalPreviews() {
+        const container = document.getElementById('edit_new_images_preview');
+        const input = document.getElementById('edit_new_images');
+        container.innerHTML = '';
+
+        if (editModalFilesArray.length > 0) {
+            container.classList.remove('hidden');
+
+            editModalFilesArray.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const div = document.createElement('div');
+                    div.className = 'p-2 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-600 flex flex-col gap-1.5 relative group';
+
+                    div.innerHTML = `
+                    <button type="button" onclick="removeNewImageFromModal(${index})" 
+                        class="absolute -top-1.5 -right-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md z-10 transition-transform hover:scale-110">
+                        &times;
+                    </button>
+                    <div class="aspect-video w-full rounded overflow-hidden border bg-gray-50 flex items-center justify-center">
+                        <img src="${e.target.result}" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <input type="text" name="new_image_colors[${index}]" placeholder="New Color" 
+                            class="w-full px-2 py-1 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 rounded text-[11px] focus:outline-none dark:text-white">
+                    </div>
+                `;
+                    container.appendChild(div);
+                }
+                reader.readAsDataURL(file);
+            });
+        } else {
+            container.classList.add('hidden');
+        }
+
+        const dataTransfer = new DataTransfer();
+        editModalFilesArray.forEach(file => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+    }
+
+    function removeNewImageFromModal(indexToRemove) {
+        editModalFilesArray.splice(indexToRemove, 1); // ရွေးထားတဲ့ပုံကို ဖြုတ်လိုက်မယ်
+        renderEditModalPreviews(); // UI ကို တစ်ခါပြန်ဆွဲမယ်
     }
 
     function closeEditModal() {
