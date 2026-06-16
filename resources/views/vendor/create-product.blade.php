@@ -29,13 +29,7 @@
                 </svg>
             </a>
             <h2 class="text-base font-bold tracking-wide">Add Product</h2>
-        </div>
-        <button id="menuBtn"
-            class="text-gray-600 dark:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
+        </div>        
     </nav>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden"></div>
@@ -145,7 +139,7 @@
 
                 <div class="mt-6 border-t pt-4">
                     <h3 class="text-md font-bold text-gray-700 dark:text-gray-300 mb-2">📸 Product Images & Colors
-                        (ကုန်ပစ္စည်းပုံများနှင့် အရောင်များ)</h3>
+                        (Maximum size 2Mb)</h3>
                     <p class="text-xs text-gray-400 mb-3">ပုံများကို တစ်ပြိုင်နက် စုရွေးနိုင်ပါသည်။ ရွေးပြီးပါက
                         ပုံတစ်ပုံချင်းစီအတွက် အရောင်သတ်မှတ်နိုင်မည့် အကွက်များ ပေါ်လာပါလိမ့်မည်။</p>
 

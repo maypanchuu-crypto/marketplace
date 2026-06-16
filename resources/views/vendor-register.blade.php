@@ -11,7 +11,7 @@
         tailwind.config = {
             darkMode: 'class',
         }
-        // Flash နည်းအောင် Head ထဲမှာ ချက်ချင်း စစ်ဆေးပြီး Dark mode သွင်းခြင်း
+
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
@@ -42,12 +42,12 @@
             <h2 class="text-base font-bold tracking-wide">Become a Vendor</h2>
         </div>
 
-        <button id="menuBtn"
+        <!-- <button id="menuBtn"
             class="text-gray-600 dark:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
-        </button>
+        </button> -->
     </nav>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300"></div>
@@ -263,10 +263,10 @@
     </div>
 
     <script>
-        const menuBtn = document.getElementById('menuBtn');
-        const closeBtn = document.getElementById('closeBtn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        // const menuBtn = document.getElementById('menuBtn');
+        // const closeBtn = document.getElementById('closeBtn');
+        // const sidebar = document.getElementById('sidebar');
+        // const sidebarOverlay = document.getElementById('sidebarOverlay');
         const darkModeRow = document.getElementById('darkModeRow');
         const darkModeToggle = document.getElementById('darkModeToggle');
 
@@ -296,18 +296,18 @@
         }
 
         // --- ၂။ Sidebar Logic ---
-        if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
-                sidebar.classList.remove('-translate-x-full');
-                sidebarOverlay.classList.remove('hidden');
-            });
-        }
-        const closeSidebar = () => {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-        };
-        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+        // if (menuBtn) {
+        //     menuBtn.addEventListener('click', () => {
+        //         sidebar.classList.remove('-translate-x-full');
+        //         sidebarOverlay.classList.remove('hidden');
+        //     });
+        // }
+        // const closeSidebar = () => {
+        //     sidebar.classList.add('-translate-x-full');
+        //     sidebarOverlay.classList.add('hidden');
+        // };
+        // if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        // if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
 
         function previewImage(event) {
             const input = event.target;

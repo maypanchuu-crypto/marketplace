@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\OrderItem;
 
 class VendorDashboardController extends Controller
 {
@@ -58,7 +59,7 @@ class VendorDashboardController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'description' => 'required|string|min:5',
-            'sizes' => 'nullable|string', 
+            'sizes' => 'nullable|string',
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
             'image_colors' => 'nullable|array',
@@ -152,7 +153,7 @@ class VendorDashboardController extends Controller
                         ->where('product_id', $product->id)
                         ->update(['color' => $cleanedColor]);
 
-                    $mainColors[] = $cleanedColor; 
+                    $mainColors[] = $cleanedColor;
                 } else {
                     \App\Models\ProductImage::where('id', $imageId)
                         ->where('product_id', $product->id)
@@ -184,7 +185,7 @@ class VendorDashboardController extends Controller
                 ]);
 
                 if (!empty($color)) {
-                    $mainColors[] = $color; 
+                    $mainColors[] = $color;
                 }
             }
         }
@@ -218,5 +219,16 @@ class VendorDashboardController extends Controller
 
         // show success message
         return redirect()->back()->with('success', 'Product deleted successfully!');
+    }
+
+    public function orderIndex()
+    {
+        // မိမိဆိုင်က ပစ္စည်းတွေ ပါဝင်နေတဲ့ Order Items စာရင်းကိုပဲ ဆွဲထုတ်ခြင်း
+        $myOrders = OrderItem::with('order', 'product')
+            ->where('vendor_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return view('vendor.orders.index', compact('myOrders'));
     }
 }

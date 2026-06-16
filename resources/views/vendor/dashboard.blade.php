@@ -265,7 +265,7 @@
                     Showing {{ $products->count() }} items
                 </span> -->
             </div>
-
+            <a href="{{ route('vendor.orders.index') }}" class="...">My Shop Orders</a>
             <div class="w-full overflow-x-auto rounded-xl border dark:border-gray-700">
                 <table class="w-full text-left border-collapse min-w-[600px]">
                     <thead>

@@ -67,7 +67,7 @@ class CartController extends Controller
         }
 
         session()->put('cart', $cart);
-        return redirect()->route('cart.index')->with('success', 'Product added to cart!');
+        return redirect()->route('dashboard')->with('success', 'Product added to cart!');
     }
 
     // ၃။ အရေအတွက် တိုး/လျော့ Update လုပ်ရန်

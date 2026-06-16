@@ -24,7 +24,7 @@ class VendorRegistrationController extends Controller
         // Validation တွင် payment_slip အတွက် image စစ်ဆေးချက်ထည့်ခြင်း
         $request->validate([
             'shop_name' => 'required|string|max:255|unique:users,shop_name,' . $user->id,
-            'shop_phone' => 'required|string|max:20',
+            'shop_phone' => 'required|digits_between:8,11',
             'shop_description' => 'required|string|min:10',
             'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
         ]);
