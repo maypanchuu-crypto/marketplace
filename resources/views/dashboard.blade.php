@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Customer Dashboard</title>
 
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
             tailwind.config = {
@@ -19,68 +20,64 @@
             body {
                 transition: background-color 0.3s ease, color 0.3s ease;
             }
+
+            [x-cloak] {
+                display: none !important;
+            }
         </style>
     </head>
 
-    <body
+    <body x-data="{ 
+        searchQuery: '',
+        // Search လုပ်ရင် အကုန်ထဲက ရှာရအောင် trending ကော more ကောကို array တစ်ခုတည်း ပေါင်းထည့်ထားမယ်
+        products: {{ json_encode($trendingProducts->merge($moreProducts)->unique('id')->map(function ($product) {
+    return [
+        'id' => $product->id,
+        'name' => $product->name,
+        'description' => $product->description ?? 'No description available.',
+        'price' => number_format($product->price) . ' MMK',
+        'stock' => $product->stock,
+        'image' => $product->image ? asset('storage/' . $product->image) : '',
+        'url' => route('products.show', $product->id)
+    ];
+})) }},
+        
+        // Blade ဘက်က သီးသန့်လာတဲ့ Array ၂ ခုကို JavaScript ထဲ တိုက်ရိုက်သိမ်းထားမယ်
+        trendingProducts: {{ json_encode($trendingProducts->map(function ($product) {
+    return [
+        'id' => $product->id,
+        'name' => $product->name,
+        'description' => $product->description ?? 'No description available.',
+        'price' => number_format($product->price) . ' MMK',
+        'stock' => $product->stock,
+        'image' => $product->image ? asset('storage/' . $product->image) : '',
+        'url' => route('products.show', $product->id)
+    ];
+})) }},
+
+        moreProducts: {{ json_encode($moreProducts->map(function ($product) {
+    return [
+        'id' => $product->id,
+        'name' => $product->name,
+        'description' => $product->description ?? 'No description available.',
+        'price' => number_format($product->price) . ' MMK',
+        'stock' => $product->stock,
+        'image' => $product->image ? asset('storage/' . $product->image) : '',
+        'url' => route('products.show', $product->id)
+    ];
+})) }},
+
+        get filteredProducts() {
+            if (this.searchQuery.trim() === '') {
+                return [];
+            }
+            return this.products.filter(p => 
+                p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                p.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        }
+     }" @product-search.window="searchQuery = $event.detail"
         class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen pb-24 relative overflow-x-hidden">
-
-        <?php /*<nav class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b dark:border-gray-700">
-  <div class="flex items-center flex-shrink-0">
-      <button id="menuBtn" class="text-gray-600 dark:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none flex-shrink-0">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-      </button>
-  </div>
-
-  <div class="flex-grow max-w-2xl mx-4 relative">
-      <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-      </span>
-      <input type="text" placeholder="Search products..." 
-             class="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-full text-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
-  </div>
-
-  <!-- Settings Dropdown -->
-      <div class="hidden sm:flex sm:items-center sm:ms-6">
-          <x-dropdown align="right" width="48">
-              <x-slot name="trigger">
-                  <button
-                      class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                      <div>{{ Auth::user()->name }}</div>
-
-                      <div class="ms-1">
-                          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 20 20">
-                              <path fill-rule="evenodd"
-                                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                  clip-rule="evenodd" />
-                          </svg>
-                      </div>
-                  </button>
-              </x-slot>
-
-              <x-slot name="content">
-                  <x-dropdown-link :href="route('profile.edit')">
-                      {{ __('Profile') }}
-                  </x-dropdown-link>
-
-                  <!-- Authentication -->
-                  <form method="POST" action="{{ route('logout') }}">
-                      @csrf
-
-                      <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                          this.closest('form').submit();">
-                          {{ __('Log Out') }}
-                      </x-dropdown-link>
-                  </form>
-              </x-slot>
-          </x-dropdown>
-      </div>
-</nav>*/ ?>
 
         <div id="sidebarOverlay"
             class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300 overflow-y-auto"></div>
@@ -139,24 +136,6 @@
                         </a>
                     @endif
 
-                    <!-- <a href="{{ route('cart.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 100 4 2 2 0 000-4z"></path>
-                    </svg>
-                    Cart
-                </a> -->
-
-                    <!-- <a href="#"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
-                            </path>
-                        </svg>
-                        Orders
-                    </a> -->
-
                     <div id="darkModeRow"
                         class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm cursor-pointer select-none">
                         <span class="flex items-center gap-3 tracking-wide">
@@ -204,91 +183,160 @@
             </form>
         </div>
 
-        <main class="max-w-7xl mx-auto px-4 py-6">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4 tracking-wide">Trending Products</h3>
-            @if(session('success'))
-                <div id="success-alert"
-                    class="mb-6 flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 rounded-2xl shadow-sm transition-all duration-300">
+        <main class="max-w-7xl mx-auto px-4 pt-6 pb-36">
 
-                    <div class="flex items-center space-x-3">
-                        <div class="p-2 bg-green-500 rounded-xl text-white">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7">
-                                </path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-black text-green-800 dark:text-green-400">Success!</h4>
-                            <p class="text-xs font-semibold text-green-600 dark:text-green-500 mt-0.5">
-                                {{ session('success') }}</p>
-                        </div>
+            <template x-if="searchQuery.trim() !== ''">
+                <div>
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white tracking-wide">
+                            Search Results for '<span x-text="searchQuery" class="text-blue-600"></span>'
+                        </h3>
                     </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        <template x-for="product in filteredProducts" :key="'search-' + product.id">
+                            <a :href="product.url" class="block">
+                                <div
+                                    class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 rounded-2xl flex flex-col justify-between transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden relative h-full">
 
-                    <button onclick="document.getElementById('success-alert').style.display='none'"
-                        class="p-1.5 hover:bg-green-100 dark:hover:bg-green-900/40 rounded-xl text-green-500 hover:text-green-700 transition duration-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                            </path>
-                        </svg>
-                    </button>
+                                    <div
+                                        class="w-full h-64 bg-gray-50 dark:bg-gray-700/20 relative flex items-center justify-center border-b border-gray-200 dark:border-gray-700/70 overflow-hidden flex-shrink-0 p-3">
+                                        <template x-if="product.image">
+                                            <img :src="product.image" :alt="product.name"
+                                                class="max-w-full max-h-full w-auto h-auto object-contain mx-auto">
+                                        </template>
+                                        <template x-if="!product.image">
+                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                        </template>
+                                    </div>
+
+                                    <div class="p-4 flex flex-col flex-grow justify-between mt-auto">
+                                        <div class="mb-3">
+                                            <h4 class="font-bold text-sm text-gray-900 dark:text-white leading-snug mb-1 truncate"
+                                                x-text="product.name"></h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 min-h-[2rem]"
+                                                x-text="product.description"></p>
+                                        </div>
+                                        <div
+                                            class="mt-auto pt-2 flex-shrink-0 border-t border-gray-100 dark:border-gray-700/50">
+                                            <div class="text-blue-600 dark:text-blue-400 font-extrabold text-sm mb-1"
+                                                x-text="product.price"></div>
+                                            <div class="flex justify-between items-center text-[11px]">
+                                                <span class="text-gray-400">Stock: <strong
+                                                        class="text-gray-700 dark:text-gray-300 font-semibold"
+                                                        x-text="product.stock"></strong></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </template>
+                    </div>
+                    <div x-show="filteredProducts.length === 0" class="text-center py-12 text-gray-400">
+                        <span>No products found</span>
+                    </div>
                 </div>
-            @endif
+            </template>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                @forelse($products as $product)
-                    <a href="{{ route('products.show', $product->id) }}" class="block">
-                        <div
-                            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 rounded-2xl flex flex-col justify-between transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden relative">
+            <template x-if="searchQuery.trim() === ''">
+                <div class="space-y-10">
 
-                            <div
-                                class="w-full h-48 bg-gray-100 dark:bg-gray-700 relative flex items-center justify-center border-b border-gray-200 dark:border-gray-700/70 overflow-hidden flex-shrink-0">
-                                @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
-                                        class="w-full h-full object-cover">
-                                @else
-                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                @endif
-                            </div>
-
-                            <div class="p-4 flex flex-col flex-grow justify-between">
-                                <div>
-                                    <h4 class="font-bold text-sm text-gray-900 dark:text-white leading-snug mb-1 truncate">
-                                        {{ $product->name }}
-                                    </h4>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2 min-h-[2rem]">
-                                        {{ $product->description ?? 'No description available.' }}
-                                    </p>
-                                </div>
-
-                                <div class="mt-2 flex-shrink-0">
-                                    <div class="text-blue-600 dark:text-blue-400 font-extrabold text-sm mb-2">
-                                        {{ number_format($product->price) }} MMK
-                                    </div>
-                                    <div class="flex justify-between items-center text-[11px]">
-                                        <span class="text-gray-400">Stock: <strong
-                                                class="text-gray-700 dark:text-gray-300 font-semibold">{{ $product->stock }}</strong></span>
-                                    </div>
-                                </div>
-                            </div>
+                    <div>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-bold text-gray-800 dark:text-white tracking-wide">Trending Products
+                            </h3>
                         </div>
-                    </a>
-                @empty
-                    <div
-                        class="col-span-full text-center py-12 text-gray-400 flex flex-col items-center justify-center gap-2">
-                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                        <span>No products found.</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                            <template x-for="product in trendingProducts" :key="'trending-' + product.id">
+                                <a :href="product.url" class="block">
+                                    <div
+                                        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 rounded-2xl flex flex-col justify-between transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden relative h-full">
+                                        <div
+                                            class="w-full h-48 bg-gray-100 dark:bg-gray-700 relative flex items-center justify-center border-b border-gray-200 dark:border-gray-700/70 overflow-hidden flex-shrink-0">
+                                            <template x-if="product.image"><img :src="product.image" :alt="product.name"
+                                                    class="w-full h-full object-cover"></template>
+                                            <template x-if="!product.image">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                    stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                    </path>
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <div class="p-4 flex flex-col flex-grow justify-between">
+                                            <div>
+                                                <h4 class="font-bold text-sm text-gray-900 dark:text-white leading-snug mb-1 truncate"
+                                                    x-text="product.name"></h4>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2 min-h-[2rem]"
+                                                    x-text="product.description"></p>
+                                            </div>
+                                            <div class="mt-2 flex-shrink-0">
+                                                <div class="text-blue-600 dark:text-blue-400 font-extrabold text-sm mb-2"
+                                                    x-text="product.price"></div>
+                                                <div class="flex justify-between items-center text-[11px]"><span
+                                                        class="text-gray-400">Stock: <strong
+                                                            class="text-gray-700 dark:text-gray-300 font-semibold"
+                                                            x-text="product.stock"></strong></span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
                     </div>
-                @endforelse
-            </div>
+
+                    <div>
+                        <div class="mb-4 border-t border-gray-100 dark:border-gray-800 pt-6">
+                            <h3 class="text-lg font-bold text-gray-800 dark:text-white tracking-wide">More Products</h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                            <template x-for="product in moreProducts" :key="'more-' + product.id">
+                                <a :href="product.url" class="block">
+                                    <div
+                                        class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 rounded-2xl flex flex-col justify-between transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg overflow-hidden relative h-full">
+                                        <div
+                                            class="w-full h-48 bg-gray-100 dark:bg-gray-700 relative flex items-center justify-center border-b border-gray-200 dark:border-gray-700/70 overflow-hidden flex-shrink-0">
+                                            <template x-if="product.image"><img :src="product.image" :alt="product.name"
+                                                    class="w-full h-full object-cover"></template>
+                                            <template x-if="!product.image">
+                                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                                    stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                    </path>
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <div class="p-4 flex flex-col flex-grow justify-between">
+                                            <div>
+                                                <h4 class="font-bold text-sm text-gray-900 dark:text-white leading-snug mb-1 truncate"
+                                                    x-text="product.name"></h4>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-2 min-h-[2rem]"
+                                                    x-text="product.description"></p>
+                                            </div>
+                                            <div class="mt-2 flex-shrink-0">
+                                                <div class="text-blue-600 dark:text-blue-400 font-extrabold text-sm mb-2"
+                                                    x-text="product.price"></div>
+                                                <div class="flex justify-between items-center text-[11px]">
+                                                    <span class="text-gray-400">Stock: <strong
+                                                            class="text-gray-700 dark:text-gray-300 font-semibold"
+                                                            x-text="product.stock"></strong></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
         </main>
 
         <div

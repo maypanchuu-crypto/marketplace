@@ -9,25 +9,23 @@
         </button>
     </div>
 
-    <div class="flex-grow max-w-2xl mx-4 relative">
+    <div class="flex-grow max-w-2xl mx-4 relative" x-data="{ query: '' }">
         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z">
                 </path>
             </svg>
         </span>
-        <input type="text" placeholder="Search products..."
+        <input type="text" x-model="query" @input="$dispatch('product-search', query)" placeholder="Search products..."
             class="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-full text-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
     </div>
 
-    <!-- Settings Dropdown -->
     <div class="hidden sm:flex sm:items-center sm:ms-6">
         <x-dropdown align="right" width="48">
             <x-slot name="trigger">
                 <button
                     class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                     <div>{{ Auth::user()->name }}</div>
-
                     <div class="ms-1">
                         <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
@@ -39,16 +37,11 @@
             </x-slot>
 
             <x-slot name="content">
-                <x-dropdown-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-dropdown-link>
-
-                <!-- Authentication -->
+                <x-dropdown-link :href="route('profile.edit')">{{ __('Profile') }}</x-dropdown-link>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
-                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                    <x-dropdown-link :href="route('logout')"
+                        onclick="event.preventDefault(); this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-dropdown-link>
                 </form>
@@ -56,50 +49,3 @@
         </x-dropdown>
     </div>
 </nav>
-
-<!-- <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const closeBtn = document.getElementById('closeBtn');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebarOverlay');
-    const darkModeRow = document.getElementById('darkModeRow');
-    const darkModeToggle = document.getElementById('darkModeToggle');
-
-    // Sidebar Logic
-    menuBtn.addEventListener('click', () => {
-        sidebar.classList.remove('-translate-x-full');
-        sidebarOverlay.classList.remove('hidden');
-    });
-
-    const closeSidebar = () => {
-        sidebar.classList.add('-translate-x-full');
-        sidebarOverlay.classList.add('hidden');
-    };
-    closeBtn.addEventListener('click', closeSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
-
-    // Dark Mode Function
-    function updateTheme(isDark) {
-        if (isDark) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-            darkModeToggle.checked = true;
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-            darkModeToggle.checked = false;
-        }
-    }
-
-    // Init Dark Mode from memory
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        updateTheme(true);
-    } else {
-        updateTheme(false);
-    }
-
-    // Toggle Dark Mode when clicking anywhere on the row
-    darkModeRow.addEventListener('click', () => {
-        updateTheme(!darkModeToggle.checked);
-    });
-</script> -->

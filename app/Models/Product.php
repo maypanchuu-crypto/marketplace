@@ -29,10 +29,15 @@ class Product extends Model
 
     public function vendor(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id'); 
+        return $this->belongsTo(User::class, 'user_id');
     }
     public function images()
     {
         return $this->hasMany(ProductImage::class);
+    }
+
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

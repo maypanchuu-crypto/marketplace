@@ -26,4 +26,32 @@
             </div>
         </div>
     </div>
+    <script>
+        const darkModeRow = document.getElementById('darkModeRow');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+
+        function updateTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                if (darkModeToggle) darkModeToggle.checked = true;
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                if (darkModeToggle) darkModeToggle.checked = false;
+            }
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            updateTheme(true);
+        } else {
+            updateTheme(false);
+        }
+
+        if (darkModeRow && darkModeToggle) {
+            darkModeRow.addEventListener('click', () => {
+                updateTheme(!darkModeToggle.checked);
+            });
+        }
+    </script>
 </x-app-layout>

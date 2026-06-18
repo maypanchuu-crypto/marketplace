@@ -25,7 +25,7 @@ class CheckoutController extends Controller
             $total += $item['price'] * $item['quantity'];
         }
 
-        // 🌟 ဤနေရာတွင် Random OTP ၄ လုံးဂဏန်း ထုတ်ပြီး Session ထဲသိမ်းခြင်း
+        // 🌟 စာမျက်နှာဖွင့်ကတည်းက Random OTP ကို ထုတ်ပြီး Session ထဲ တစ်ခါတည်း သိမ်းထားမည်
         $randomOtp = rand(1000, 9999);
         session()->put('demo_otp', $randomOtp);
 

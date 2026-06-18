@@ -121,7 +121,7 @@
                                         class="block text-xs text-amber-500 dark:text-amber-400 font-bold uppercase mb-1.5">Color</label>
                                     <select id="color" name="color" onchange="changeProductImageByColor(this.value)"
                                         class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 dark:text-white font-medium shadow-sm">
-                                        <option value="">-- Color --</option>
+                                        <!-- <option value="">-- Color --</option> -->
                                         @foreach(json_decode($product->colors) as $color)
                                             <option value="{{ strtolower($color) }}">{{ ucfirst($color) }}</option>
                                         @endforeach
