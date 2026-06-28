@@ -246,11 +246,14 @@
                 <div class="space-y-10">
 
                     <div>
+                        <div>
+                             {{ session('success') }}
+                        </div>
                         <div class="mb-4">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white tracking-wide">Trending Products
                             </h3>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-5">
                             <template x-for="product in trendingProducts" :key="'trending-' + product.id">
                                 <a :href="product.url" class="block">
                                     <div
@@ -294,7 +297,7 @@
                         <div class="mb-4 border-t border-gray-100 dark:border-gray-800 pt-6">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white tracking-wide">More Products</h3>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-5">
                             <template x-for="product in moreProducts" :key="'more-' + product.id">
                                 <a :href="product.url" class="block">
                                     <div

@@ -10,6 +10,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Vendor\VendorWalletController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,9 +44,7 @@ Route::middleware('auth')->group(function () {
 
     // for admin only
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Admin Vendor Requests Routes
         Route::get('/vendor-requests', [AdminVendorController::class, 'index'])->name('vendor.requests');
@@ -110,6 +109,9 @@ Route::patch('/update-cart', [CartController::class, 'updateCart'])->name('cart.
 Route::delete('/remove-from-cart', [CartController::class, 'removeCart'])->name('cart.remove');
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+Route::post('/checkout/qr-payment', [CheckoutController::class, 'createQrPayment']);
+Route::post('/qr/scan', [CheckoutController::class, 'scanQr']);
+Route::get('/qr/status/{tx_id}', [CheckoutController::class, 'checkQrStatus']);
 
 
 require __DIR__ . '/auth.php';

@@ -28,13 +28,13 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        
+
         $user = auth()->user();
 
         if ($user->role === 'admin') {
             return redirect()->intended(route('admin.dashboard'));
-        } 
-        
+        }
+
         if ($user->role === 'vendor') {
             return redirect()->intended(route('vendor.dashboard'));
         }
@@ -42,7 +42,13 @@ class AuthenticatedSessionController extends Controller
         // Default redirection for customers
         return redirect()->intended(route('dashboard'));
 
-        //return redirect()->intended(RouteServiceProvider::HOME);
+        if (Auth::check()) {
+            Auth::user()->update([
+                'last_login_at' => Carbon::now()
+            ]);
+        }
+
+        return redirect()->intended(RouteServiceProvider::HOME);
     }
 
     /**

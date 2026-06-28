@@ -161,8 +161,8 @@
                                         <span class="text-xs text-gray-400">No Slip</span>
                                     @endif
                                 </td>
-                                <td class="p-4 text-gray-500 dark:text-gray-400 max-w-xs truncate"
-                                    title="{{ $req->payment_slip }}">Payment Slip</td>
+                                <!-- <td class="p-4 text-gray-500 dark:text-gray-400 max-w-xs truncate" -->
+                                    <!-- title="{{ $req->payment_slip }}">Payment Slip</td> -->
                                 <td class="p-4 text-right flex justify-end gap-2 items-center h-full pt-5">
                                     <form action="{{ route('admin.vendor.approve', $req->id) }}" method="POST">
                                         @csrf

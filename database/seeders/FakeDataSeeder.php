@@ -22,7 +22,7 @@ class FakeDataSeeder extends Seeder
             'name' => 'Super Admin',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('password'),
-            'role' => 'admin', // သုတရဲ့ role သတ်မှတ်ချက်အတိုင်း ပြင်ရေးပါ
+            'role' => 'admin', 
             'vendor_status' => 'approved',
         ]);
 
@@ -45,9 +45,7 @@ class FakeDataSeeder extends Seeder
             'role' => 'customer',
         ]);
 
-        // 💡 ဤနေရာတွင် စမ်းသပ်ရန် Product တစ်ခု အရင်ဆောက်ပေးဖို့ လိုအပ်ပါသည်
-        // မင်းဆီမှာ Product Factory ရှိရင် သုံးပါ၊ မရှိရင် အောက်ပါအတိုင်း လက်နဲ့ ဆောက်ပါ
-        // (မှတ်ချက်: Product model ရဲ့ fillable အတိုင်း ပြင်ရေးပေးပါဦး)
+        
         $product = Product::create([
             'user_id' => $vendor->id, // Vendor တင်တဲ့ product
             'name' => 'Fake Lipstick',

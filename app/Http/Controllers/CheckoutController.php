@@ -9,6 +9,9 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\QrTransaction;
+use Illuminate\Support\Str;
+use App\Models\Wallet;
 
 class CheckoutController extends Controller
 {
@@ -112,4 +115,129 @@ class CheckoutController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Payment Successful! Your order has been placed and paid via Mobile Wallet.');
     }
+public function createQrPayment(Request $request)
+{
+    $user = Auth::user();
+
+    $cart = session()->get('cart', []);
+    if (empty($cart)) {
+        return response()->json(['error' => 'Cart is empty'], 400);
+    }
+
+    $total = 0;
+    $vendorId = null;
+
+    foreach ($cart as $id => $item) {
+        $product = Product::find($item['product_id'] ?? $id);
+        $total += $item['price'] * $item['quantity'];
+        $vendorId = $product->user_id;
+    }
+
+    $commission = $total * 0.05;
+    $vendorAmount = $total - $commission;
+
+    $txId = 'TXN_' . Str::uuid();
+
+    $tx = QrTransaction::create([
+        'tx_id' => $txId,
+        'buyer_id' => $user->id,
+        'vendor_id' => $vendorId,
+        'amount' => $total,
+        'commission_amount' => $commission,
+        'vendor_amount' => $vendorAmount,
+        'status' => 'generated',
+        'expires_at' => now()->addMinutes(5),
+    ]);
+
+    // 🟢 SIMPLE DEMO QR (NO PACKAGE REQUIRED)
+    $qrData = json_encode([
+        'tx_id' => $txId,
+        'amount' => $total
+    ]);
+
+    return response()->json([
+    'tx_id' => $txId,
+    'amount' => $total,
+    'qr' => 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($txId)
+]);
+}
+public function scanQr(Request $request)
+{
+    $request->validate([
+        'tx_id' => 'required|string'
+    ]);
+
+    $tx = QrTransaction::where('tx_id', $request->tx_id)->first();
+
+    if (!$tx) {
+        return response()->json(['error' => 'Invalid QR'], 404);
+    }
+
+    // ❌ prevent double payment
+    if ($tx->status == 'completed') {
+        return response()->json(['error' => 'Already paid'], 400);
+    }
+
+    // ❌ expired check
+    if ($tx->expires_at && now()->gt($tx->expires_at)) {
+        $tx->update(['status' => 'expired']);
+        return response()->json(['error' => 'QR expired'], 400);
+    }
+
+    // mark processing
+    $tx->update(['status' => 'processing']);
+
+    DB::transaction(function () use ($tx) {
+
+        $adminId = 1; // system admin
+
+        // wallets
+        $vendorWallet = Wallet::firstOrCreate(['user_id' => $tx->vendor_id]);
+        $adminWallet = Wallet::firstOrCreate(['user_id' => $adminId]);
+
+        // 💰 vendor credit
+        $vendorWallet->balance += $tx->vendor_amount;
+        $vendorWallet->save();
+
+        $vendorWallet->transactions()->create([
+            'type' => 'credit',
+            'amount' => $tx->vendor_amount,
+            'reference_type' => 'qr_payment',
+            'reference_id' => $tx->tx_id,
+        ]);
+
+        // 💰 admin commission
+        $adminWallet->balance += $tx->commission_amount;
+        $adminWallet->save();
+
+        $adminWallet->transactions()->create([
+            'type' => 'credit',
+            'amount' => $tx->commission_amount,
+            'reference_type' => 'qr_payment',
+            'reference_id' => $tx->tx_id,
+        ]);
+
+        // mark completed
+        $tx->update(['status' => 'completed']);
+    });
+
+    return response()->json([
+        'message' => 'Payment successful',
+        'tx_id' => $tx->tx_id
+    ]);
+}
+
+public function checkQrStatus($tx_id)
+{
+    $tx = QrTransaction::where('tx_id', $tx_id)->first();
+
+    if (!$tx) {
+        return response()->json(['status' => 'invalid']);
+    }
+
+    return response()->json([
+        'status' => $tx->status,
+        'amount' => $tx->amount
+    ]);
+}
 }

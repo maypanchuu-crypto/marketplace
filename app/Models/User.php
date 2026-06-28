@@ -27,6 +27,7 @@ class User extends Authenticatable
         'shop_description',
         'shop_phone',
         'payment_slip',
+        'last_login_at',
     ];
 
     /**
@@ -54,5 +55,21 @@ class User extends Authenticatable
         'shop_description' => 'string',
         'shop_phone' => 'string',
         'payment_slip' => 'string',
+        'last_login_at' => 'timestamp',
     ];
+
+    public function wallet()
+{
+    return $this->hasOne(Wallet::class);
+}
+
+public function buyerTransactions()
+{
+    return $this->hasMany(QrTransaction::class, 'buyer_id');
+}
+
+public function vendorTransactions()
+{
+    return $this->hasMany(QrTransaction::class, 'vendor_id');
+}
 }
