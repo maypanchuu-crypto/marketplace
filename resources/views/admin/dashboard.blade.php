@@ -5,7 +5,7 @@
 <a href="{{ route('admin.orders.index') }}" class="...">Admin Orders</a> -->
 
 <!DOCTYPE html>
-<x-app-layout :hideNav="true">
+<x-app-layout :hideSearch="true">
     <html lang="en">
 
     <head>
@@ -36,17 +36,22 @@
     <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
 
         <div class="flex h-screen overflow-hidden">
-
-            <aside
-                class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 hidden md:flex flex-col justify-between">
+            <div id="sidebarOverlay"
+                class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300 overflow-y-auto">
+            </div>
+            <div id="sidebar"
+                class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out p-5 flex flex-col justify-between overflow-y-auto">
                 <div>
-                    <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
                         <h2 class="text-lg font-black tracking-wider text-blue-600 dark:text-blue-400">SUPER ADMIN</h2>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Management Portal
-                        </p>
+                        <button id="closeBtn" class="text-gray-500 hover:text-gray-800 dark:hover:text-white p-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
                     </div>
 
-                    <nav class="px-4 space-y-1.5">
+                    <div class="space-y-1">
                         <a href="#"
                             class="flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -56,8 +61,27 @@
                             </svg>
                             Dashboard
                         </a>
-                        <a href="#"
-                            class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/40 rounded-xl text-sm font-semibold transition">
+
+                        <a href="{{ route('dashboard') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm border-t dark:border-gray-700 mt-4 pt-4">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Customer Marketplace
+                        </a>
+                        <a href="{{ route('admin.vendor.requests') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Vendor Requests
+                        </a>
+
+                        <a href="{{ route('admin.users.index') }}"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -65,7 +89,8 @@
                             </svg>
                             User Management
                         </a>
-                        <a href="#"
+
+                        <!-- <a href="#"
                             class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/40 rounded-xl text-sm font-semibold transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -73,9 +98,10 @@
                                 </path>
                             </svg>
                             Analytics
-                        </a>
+                        </a> -->
+
                         <a href="#"
-                            class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/40 rounded-xl text-sm font-semibold transition">
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12 3 7.582 7.03 4 12 4s9 3.582 9 8z">
@@ -83,30 +109,55 @@
                             </svg>
                             Communication
                         </a>
-                    </nav>
-                </div>
 
-                <div class="p-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center gap-3">
-                    <div
-                        class="w-9 h-9 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-xs">
-                        SA</div>
-                    <div>
-                        <div class="text-xs font-bold">Thute (Super Admin)</div>
-                        <div class="text-[10px] text-gray-400">system@admin.com</div>
+                        <div id="darkModeRow"
+                            class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm cursor-pointer select-none">
+                            <span class="flex items-center gap-3 tracking-wide">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                                    </path>
+                                </svg>
+                                Dark Mode
+                            </span>
+                            <div class="relative w-9 h-5 flex-shrink-0 pointer-events-none">
+                                <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                                <div
+                                    class="absolute inset-0 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <a href="#"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                            </path>
+                        </svg>
+                        Messages
+                        </a> -->
                     </div>
                 </div>
-            </aside>
+
+                <form method="POST" action="{{ route('logout') }}"
+                    class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                    @csrf
+                    <button type="submit"
+                        class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 font-medium text-sm text-left">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                            </path>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+            </div>
 
             <main class="flex-grow p-6 overflow-y-auto pb-40">
-
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white">System Insights
-                            Overview</h1>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Real-time platform performance
-                            tracker.</p>
-                    </div>
-                </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
 
@@ -114,7 +165,9 @@
                         class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 p-5 rounded-2xl shadow-sm flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Stores</span>
-                            <div class="text-2xl font-black mt-1 text-gray-900 dark:text-white">{{ number_format($totalStores) }}</div>
+                            <div class="text-2xl font-black mt-1 text-gray-900 dark:text-white">
+                                {{ number_format($totalStores) }}
+                            </div>
                         </div>
                     </div>
 
@@ -122,8 +175,10 @@
                         class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/70 p-5 rounded-2xl shadow-sm flex justify-between items-center">
                         <div>
                             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Users</span>
-                            <div class="text-2xl font-black mt-1 text-gray-900 dark:text-white">{{ number_format($activeUsers) }}</div>
-                        </div>                        
+                            <div class="text-2xl font-black mt-1 text-gray-900 dark:text-white">
+                                {{ number_format($activeUsers) }}
+                            </div>
+                        </div>
                     </div>
 
                     <div
@@ -348,6 +403,51 @@
             </main>
         </div>
 
+        <script>
+            const menuBtn = document.getElementById('menuBtn');
+            const closeBtn = document.getElementById('closeBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const darkModeRow = document.getElementById('darkModeRow');
+            const darkModeToggle = document.getElementById('darkModeToggle');
+
+            function updateTheme(isDark) {
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    if (darkModeToggle) darkModeToggle.checked = true;
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    if (darkModeToggle) darkModeToggle.checked = false;
+                }
+            }
+
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                updateTheme(true);
+            } else {
+                updateTheme(false);
+            }
+
+            if (darkModeRow && darkModeToggle) {
+                darkModeRow.addEventListener('click', () => {
+                    updateTheme(!darkModeToggle.checked);
+                });
+            }
+
+            if (menuBtn) {
+                menuBtn.addEventListener('click', () => {
+                    sidebar.classList.remove('-translate-x-full');
+                    sidebarOverlay.classList.remove('hidden');
+                });
+            }
+            const closeSidebar = () => {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            };
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+        </script>
     </body>
 
     </html>

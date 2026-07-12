@@ -9,6 +9,7 @@
         </button>
     </div>
 
+    @if(!isset($hideSearch) || !$hideSearch)
     <div class="flex-grow max-w-2xl mx-4 relative" x-data="{ query: '' }">
         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -19,8 +20,9 @@
         <input type="text" x-model="query" @input="$dispatch('product-search', query)" placeholder="Search products..."
             class="w-full pl-9 pr-4 py-2 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-full text-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
     </div>
+    @endif
 
-    <div class="hidden sm:flex sm:items-center sm:ms-6">
+    <div class="flex items-center ms-6">
         <x-dropdown align="right" width="48">
             <x-slot name="trigger">
                 <button

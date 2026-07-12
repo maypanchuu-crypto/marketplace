@@ -41,9 +41,9 @@
         'url' => route('products.show', $product->id)
     ];
 })) }},
-        
-        // Blade ဘက်က သီးသန့်လာတဲ့ Array ၂ ခုကို JavaScript ထဲ တိုက်ရိုက်သိမ်းထားမယ်
-        trendingProducts: {{ json_encode($trendingProducts->map(function ($product) {
+                    
+                    // Blade ဘက်က သီးသန့်လာတဲ့ Array ၂ ခုကို JavaScript ထဲ တိုက်ရိုက်သိမ်းထားမယ်
+                    trendingProducts: {{ json_encode($trendingProducts->map(function ($product) {
     return [
         'id' => $product->id,
         'name' => $product->name,
@@ -55,7 +55,7 @@
     ];
 })) }},
 
-        moreProducts: {{ json_encode($moreProducts->map(function ($product) {
+                    moreProducts: {{ json_encode($moreProducts->map(function ($product) {
     return [
         'id' => $product->id,
         'name' => $product->name,
@@ -67,20 +67,21 @@
     ];
 })) }},
 
-        get filteredProducts() {
-            if (this.searchQuery.trim() === '') {
-                return [];
-            }
-            return this.products.filter(p => 
-                p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                p.description.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
-        }
-     }" @product-search.window="searchQuery = $event.detail"
+                    get filteredProducts() {
+                        if (this.searchQuery.trim() === '') {
+                            return [];
+                        }
+                        return this.products.filter(p => 
+                            p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            p.description.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        );
+                    }
+                }" @product-search.window="searchQuery = $event.detail"
         class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen pb-24 relative overflow-x-hidden">
 
         <div id="sidebarOverlay"
-            class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300 overflow-y-auto"></div>
+            class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300 overflow-y-auto">
+        </div>
         <div id="sidebar"
             class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out p-5 flex flex-col justify-between overflow-y-auto">
             <div>
@@ -94,8 +95,8 @@
                 </div>
 
                 <div class="space-y-1">
-                    <a href="{{ route('dashboard') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium text-sm">
+                    <a href="#"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-bold text-sm">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -247,7 +248,7 @@
 
                     <div>
                         <div>
-                             {{ session('success') }}
+                            {{ session('success') }}
                         </div>
                         <div class="mb-4">
                             <h3 class="text-lg font-bold text-gray-800 dark:text-white tracking-wide">Trending Products

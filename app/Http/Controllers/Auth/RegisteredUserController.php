@@ -32,8 +32,27 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            
+            // ၁။ 📬 Email ကို ပိုမိုတိကျစေရန် regex (Regular Expression) ဖြင့် စစ်ဆေးခြင်း
+            'email' => [
+                'required', 
+                'string', 
+                'lowercase', 
+                'max:255', 
+                'unique:'.User::class,
+                // regex က name@domain.com / .net / .org ပုံစံမျိုး မှန်ကန်မှသာ လက်ခံပါမည်
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
+            ],
+            
+            // ၂။ 🔐 Password ကို အနည်းဆုံး ၈ လုံး + စာလုံး + နံပါတ် + သင်္ကေတ ပါဝင်အောင် စစ်ဆေးခြင်း
+            'password' => [
+                'required', 
+                'confirmed', 
+                Rules\Password::min(8) // အနည်းဆုံး ၈ လုံး
+                    ->letters()        // စာလုံး (a-z, A-Z) ပါရမည်
+                    ->numbers()        // နံပါတ် (0-9) ပါရမည်
+                    ->symbols()        // အထူးသင်္ကေတ (!, @, #, $, %, etc.) ပါရမည်
+            ],
         ]);
 
         $user = User::create([
@@ -45,8 +64,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
-
-        //start change from here
+        
         $user = auth()->user();
 
         if ($user->role === 'admin') {

@@ -32,21 +32,14 @@
     <nav
         class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b dark:border-gray-700">
         <div class="flex items-center gap-3">
-            <a href="{{ route('dashboard') }}"
+            <a href="{{ route('admin.dashboard') }}"
                 class="text-gray-600 dark:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
             </a>
-            <h2 class="text-base font-bold tracking-wide">Admin Panel</h2>
+            <h2 class="text-base font-bold tracking-wide">Vendor Request</h2>
         </div>
-
-        <!-- <button id="menuBtn"
-            class="text-gray-600 dark:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button> -->
     </nav>
 
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300"></div>
@@ -162,7 +155,7 @@
                                     @endif
                                 </td>
                                 <!-- <td class="p-4 text-gray-500 dark:text-gray-400 max-w-xs truncate" -->
-                                    <!-- title="{{ $req->payment_slip }}">Payment Slip</td> -->
+                                <!-- title="{{ $req->payment_slip }}">Payment Slip</td> -->
                                 <td class="p-4 text-right flex justify-end gap-2 items-center h-full pt-5">
                                     <form action="{{ route('admin.vendor.approve', $req->id) }}" method="POST">
                                         @csrf
@@ -238,50 +231,7 @@
         </div>
     </div>
 
-    <script>
-        const menuBtn = document.getElementById('menuBtn');
-        const closeBtn = document.getElementById('closeBtn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const darkModeRow = document.getElementById('darkModeRow');
-        const darkModeToggle = document.getElementById('darkModeToggle');
-
-        function updateTheme(isDark) {
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                if (darkModeToggle) darkModeToggle.checked = true;
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                if (darkModeToggle) darkModeToggle.checked = false;
-            }
-        }
-
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            updateTheme(true);
-        } else {
-            updateTheme(false);
-        }
-
-        if (darkModeRow && darkModeToggle) {
-            darkModeRow.addEventListener('click', () => {
-                updateTheme(!darkModeToggle.checked);
-            });
-        }
-
-        if (menuBtn) {
-            menuBtn.addEventListener('click', () => {
-                sidebar.classList.remove('-translate-x-full');
-                sidebarOverlay.classList.remove('hidden');
-            });
-        }
-        const closeSidebar = () => {
-            sidebar.classList.add('-translate-x-full');
-            sidebarOverlay.classList.add('hidden');
-        };
-        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+    <script> 
 
         // Payment Slip Modal
         function showSlip(src) {

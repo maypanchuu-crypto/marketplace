@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminFinanceController;
 use App\Http\Controllers\Vendor\VendorWalletController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,12 +61,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/withdraw-requests', [AdminFinanceController::class, 'withdrawIndex'])->name('withdraw.index');
         Route::post('/withdraw-requests/{id}/approve', [AdminFinanceController::class, 'approveWithdraw'])->name('withdraw.approve');
         Route::post('/withdraw-requests/{id}/reject', [AdminFinanceController::class, 'rejectWithdraw'])->name('withdraw.reject');
-        
+
         // Admin က အော်ဒါအားလုံးကို စာရင်းချုပ် ကြည့်မည့်စာမျက်နှာ
         Route::get('/orders', [AdminFinanceController::class, 'orderIndex'])->name('orders.index');
 
         // အော်ဒါကို အောင်မြင်ကြောင်း သတ်မှတ်ပြီး Vendor ဆီ ပိုက်ဆံခွဲပေးမည့် Route
         Route::post('/orders/{id}/complete', [AdminFinanceController::class, 'completeOrder'])->name('orders.complete');
+
+        // User Management Routes
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+        Route::post('/users/{id}/toggle', [UserManagementController::class, 'toggleStatus'])->name('users.toggle');
+        Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     });
 
     // for vendor only

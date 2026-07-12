@@ -1,4 +1,4 @@
-@props(['hideNav' => false])
+@props(['hideNav' => false, 'hideSearch' => false])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -27,7 +27,7 @@
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         @if(!isset($hideNav) || !$hideNav)
-            @include('layouts.navigation')
+            @include('layouts.navigation', ['hideSearch' => $hideSearch])
         @endif
 
         <!-- Page Heading -->
