@@ -374,7 +374,7 @@
                 <span class="text-[10px] font-medium">Order History</span>
             </a>
 
-            <a href="#"
+            <a href="{{ route('message.index') }}"
                 class="flex flex-col items-center gap-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
