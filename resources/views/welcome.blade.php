@@ -193,7 +193,7 @@
                 <div style="margin-top: 1.5rem;">
                     <button type="button" onclick="closeBannedModal()" class="btn-ok">
                         OK
-                    </button>
+                    </button> // hello
                 </div>
             </div>
         </div>
