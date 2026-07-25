@@ -1,52 +1,3 @@
-<?php /* <x-guest-layout>
-  <!-- Session Status -->
-  <x-auth-session-status class="mb-4" :status="session('status')" />
-
-  <form method="POST" action="{{ route('login') }}">
-      @csrf
-
-      <!-- Email Address -->
-      <div>
-          <x-input-label for="email" :value="__('Email')" />
-          <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-          <x-input-error :messages="$errors->get('email')" class="mt-2" />
-      </div>
-
-      <!-- Password -->
-      <div class="mt-4">
-          <x-input-label for="password" :value="__('Password')" />
-
-          <x-text-input id="password" class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
-          <x-input-error :messages="$errors->get('password')" class="mt-2" />
-      </div>
-
-      <!-- Remember Me -->
-      <div class="block mt-4">
-          <label for="remember_me" class="inline-flex items-center">
-              <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-              <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
-          </label>
-      </div>
-
-      <div class="flex items-center justify-end mt-4">
-          @if (Route::has('password.request'))
-              <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
-                  {{ __('Forgot your password?') }}
-              </a>
-          @endif
-
-          <x-primary-button class="ms-3">
-              {{ __('Log in') }}
-          </x-primary-button>
-      </div>
-  </form>
-</x-guest-layout>
-*/ ?>
-
 <!doctype html>
 <html lang="en">
 
@@ -58,23 +9,18 @@
     <title>Login</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Fonts -->
-    <!-- <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" /> -->
 
-    <!-- Scripts -->
-    <!-- @vite(['resources/css/app.css', 'resources/js/app.js']) -->
     <style>
         /* --- GLOBAL RESET --- */
         * {
             box-sizing: border-box;
             font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
             margin: 0;
-            padding: 0
+            padding: 0;
         }
 
         body {
-            background: #f3f4f6;
+            background: #eef2f6;
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -83,44 +29,58 @@
             position: relative;
         }
 
-
         /* --- FORM SECTION --- */
         #formSection {
-            margin-top: 1.2px;
-            position: absolute;
-            /* top:60%; */
             width: 100%;
             display: flex;
             justify-content: center;
-            opacity: 1;
-            /* transition:opacity 1.5s ease, top 1.5s cubic-bezier(0.19, 1, 0.22, 1); */
             z-index: 1;
         }
 
+        /* 💡 3D BLOCK CARD (လိမ္မော်နှင့် အနီဦးစားပေး Rainbow Background & 3D Depth) */
         .card {
-            background: white;
-            width: 360px;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #ef4444 0%, #f97316 50%, #eab308 100%);
+            width: 380px;
+            padding: 24px;
+            border-radius: 24px;
+            border-top: 2px solid rgba(255, 255, 255, 0.7);
+            border-left: 2px solid rgba(255, 255, 255, 0.7);
+            border-bottom: 6px solid #b91c1c;
+            border-right: 3px solid #b91c1c;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
             gap: 20px;
             text-align: center;
         }
 
+        /* 💡 Glassmorphic Inner Container (စာသားများ ကြည်လင်စွာ ဖတ်နိုင်ရန် ခံပေးထားသော ဘုတ်ပြား) */
+        .card-inner {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 16px;
+            border-top: 2px solid #ffffff;
+            border-left: 2px solid #ffffff;
+            border-bottom: 4px solid #cbd5e1;
+            border-right: 2px solid #cbd5e1;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
         h2 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 2px
+            font-size: 26px;
+            font-weight: 900;
+            color: #9a3412;
+            /* လိမ္မော်ရင့်ရင့် ခေါင်းစဉ် */
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         form {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            width: 100%
+            width: 100%;
         }
 
         .input-group {
@@ -128,14 +88,15 @@
         }
 
         label {
-            font-size: 15px;
-            color: #4b5563;
-            font-weight: 500;
+            font-size: 14px;
+            color: #ea580c;
+            /* လိမ္မော်ရောင် Label */
+            font-weight: 800;
             display: block;
             margin-bottom: 6px;
+            text-transform: uppercase;
         }
 
-        /* New: Container for input and icon */
         .password-container {
             position: relative;
             display: block;
@@ -144,69 +105,82 @@
 
         #toggleIcon {
             position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #666;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            padding-right: 40px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        input:focus {
-            border-color: #1e40af;
-        }
-
-        /* New: Eye icon styling */
-        .eye-icon {
-            position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #9ca3af;
-            font-size: 18px;
-            /* For a visible icon */
-            line-height: 1;
-            padding: 0 5px;
+            color: #9a3412;
         }
 
-        button {
+        /* 💡 3D Input Boxes */
+        input {
+            width: 100%;
             padding: 12px;
+            padding-right: 40px;
+            border: 2px solid #fdba74;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+            background: #fff7ed;
+            color: #1f2937;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: #ea580c;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+        }
+
+        /* 💡 3D BUTTON (လိမ္မော်/အနီ စတိုင် 3D Push Button) */
+        button {
+            padding: 14px;
             border: none;
-            background: #1e40af;
+            background: linear-gradient(to right, #ea580c, #dc2626);
             color: white;
-            font-weight: 600;
-            border-radius: 8px;
+            font-weight: 900;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 15px;
-            transition: background 0.2s;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            /* 3D Depth အောက်ခြေအထူ */
+            border-bottom: 4px solid #991b1b;
+            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3);
+            transition: all 0.15s ease;
         }
 
         button:hover {
-            background: #172554;
+            background: linear-gradient(to right, #f97316, #ef4444);
+        }
+
+        button:active {
+            transform: translateY(3px);
+            border-bottom: 1px solid #991b1b;
+            box-shadow: none;
         }
 
         .links {
-            font-size: 15px;
-            margin-top: 6px;
+            font-size: 14px;
+            margin-top: 16px;
             line-height: 1.5;
+            font-weight: 600;
+            color: #4b5563;
         }
 
         .links a {
-            color: #1d4ed8;
+            color: #dc2626;
             cursor: pointer;
             text-decoration: none;
-            font-weight: 600
+            font-weight: 800;
+            transition: color 0.2s;
+        }
+
+        .links a:hover {
+            color: #ea580c;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -214,37 +188,41 @@
 <body>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
+
     <div id="formSection">
+        <!-- 💡 3D Rainbow Outer Card -->
         <div class="card">
-            <h2>Login</h2>
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="input-group">
-                    <label for="email" :value="__('Email')">Email</label>
-                    <input type="email" id="email" name="email" placeholder="you@example.com" :value="old('email')"
-                        required autofocus autocomplete="username">
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                </div>
-                <div class="input-group">
-                    <label for="password" :value="__('Password')">Password</label>
-                    <div class="password-container">
-                        <input type="password" id="password" name="password" placeholder="••••••••"
-                            class="password-input" required autocomplete="current-password">
-                        <i class="fas fa-eye-slash" id="toggleIcon" onclick="togglePasswordVisibility(this)"></i>
+            <!-- 💡 Inner Content Container -->
+            <div class="card-inner">
+                <h2>Login</h2>
+                <form method="POST" action="{{ route('login') }}">
+                    @csrf
+                    <div class="input-group">
+                        <label for="email" :value="__('Email')">Email</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" :value="old('email')"
+                            required autofocus autocomplete="username">
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
                     </div>
-                    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                    <div class="input-group">
+                        <label for="password" :value="__('Password')">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="password" name="password" placeholder="••••••••"
+                                class="password-input" required autocomplete="current-password">
+                            <i class="fas fa-eye-slash" id="toggleIcon" onclick="togglePasswordVisibility(this)"></i>
+                        </div>
+                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="links">
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}">
+                            {{ __('Forgot your password?') }}
+                        </a>
+                    @endif
+                    <br><br>
+                    Don't have an account? <a href="{{ route('register') }}">Register</a>
                 </div>
-                <button type="submit">Login</button>
-            </form>
-            <div class="links">
-                @if (Route::has('password.request'))
-                    <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
-                        href="{{ route('password.request') }}">
-                        {{ __('Forgot your password?') }}
-                    </a>
-                @endif
-                <br><br>
-                Don't have an account? <a href="{{ route('register') }}">Register</a>
             </div>
         </div>
     </div>
@@ -255,11 +233,9 @@
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                //icon.textContent = '🙈';
                 icon.className = 'fas fa-eye';
             } else {
                 passwordInput.type = 'password';
-                //icon.textContent = '👁';
                 icon.className = 'fas fa-eye-slash';
             }
         }

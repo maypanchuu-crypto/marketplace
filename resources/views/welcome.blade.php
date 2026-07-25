@@ -1,209 +1,282 @@
+<?php /*
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<x-app-layout :messageIcon="true">
+    <html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Marketplace</title>
 
-    <title>Laravel</title>
-
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
-
-    <style>
-        /* 📜 အခြေခံ HTML နှင့် Body အတွက် Style များ */
-        html {
-            line-height: 1.5;
-            -webkit-text-size-adjust: 100%;
-            font-family: Figtree, sans-serif;
-            background-color: #f3f4f6;
-            /* bg-gray-100 ရဲ့ အရောင် */
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            position: relative;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* 🌐 နဂိုမူလ အပြင်အဆင်အတိုင်း ကွက်တိဖြစ်စေမည့် Navigation Bar Styles */
-        .nav-container {
-            position: fixed;
-            top: 0;
-            right: 0;
-            padding: 1.5rem;
-            /* p-6 */
-            text-align: right;
-            /* text-right */
-            z-index: 10;
-            /* z-10 */
-        }
-
-        .nav-link {
-            font-weight: 600;
-            /* font-semibold */
-            font-size: 1.05rem;
-            /* 💡 နဂို 0.875rem ကနေ စာလုံးကို ပိုကြီးပြီး ကြည့်ကောင်းအောင် ပြင်လိုက်သည် */
-            color: #4b5563;
-            /* text-gray-600 */
-            text-decoration: none;
-            transition: color 0.15s ease-in-out;
-            display: inline-block;
-        }
-
-        /* Hover လုပ်လျှင် နဂိုအတိုင်း ပိုမည်းသွားစေရန် */
-        .nav-link:hover {
-            color: #111827;
-            /* hover:text-gray-900 */
-        }
-
-        /* Register ခလုတ်ကို ဘယ်ဘက်ကနေ Margin ပေးပြီး ခွာရန် */
-        .ml-4 {
-            margin-left: 1rem;
-            /* ml-4 */
-        }
-
-        /* ⚠️ Banned Modal အတွက် လိုအပ်သော Style များ */
-        .fixed {
-            position: fixed;
-        }
-
-        .inset-0 {
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-        }
-
-        .z-50 {
-            z-index: 50;
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .justify-center {
-            justify-content: center;
-        }
-
-        .p-4 {
-            padding: 1rem;
-        }
-
-        .bg-blur {
-            background-color: rgba(17, 24, 39, 0.6);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-box {
-            background-color: white;
-            border-radius: 1.5rem;
-            padding: 1.5rem;
-            max-width: 24rem;
-            width: 100%;
-            text-align: center;
-            border: 1px solid #fef3c7;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-
-        .modal-title {
-            font-size: 1.125rem;
-            font-weight: 900;
-            color: #111827;
-            margin: 0;
-        }
-
-        .modal-text {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
-            line-height: 1.625;
-        }
-
-        .btn-ok {
-            width: 100%;
-            display: inline-flex;
-            justify-content: center;
-            padding: 0.625rem 1rem;
-            background-color: #f59e0b;
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-            border: none;
-            border-radius: 0.75rem;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-
-        .btn-ok:hover {
-            background-color: #d97706;
-        }
-
-        .icon-circle {
-            margin: 0 auto 1rem auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 3.5rem;
-            width: 3.5rem;
-            border-radius: 9999px;
-            background-color: #fef3c7;
-            color: #f59e0b;
-        }
-    </style>
-</head>
-
-<body>
-    @if (Route::has('login'))
-        <div class="nav-container">
-            @auth
-                <a href="{{ url('/dashboard') }}" class="nav-link ">Dashboard</a>
-            @else
-                <a href="{{ route('login') }}" class="nav-link ">Log in</a>
-
-                @if (Route::has('register'))
-                    <a href="{{ route('register') }}" class="nav-link ml-4">Register</a>
-                @endif
-            @endauth
-        </div>
-    @endif
-
-    @if(session('account_banned_modal'))
-        <div id="bannedModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blur">
-            <div class="modal-box">
-                <div class="icon-circle">
-                    <svg style="width:2rem; height:2rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-
-                <h3 class="modal-title">Account Suspended</h3>
-                <p class="modal-text">
-                    သင့်အကောင့်သည် စနစ်စည်းကမ်းချက်များကြောင့် ခေတ္တပိတ်ပင် (Ban) ခြင်း ခံရပါသည်။
-                </p>
-
-                <div style="margin-top: 1.5rem;">
-                    <button type="button" onclick="closeBannedModal()" class="btn-ok">
-                        OK
-                    </button> // hello
-                </div>
-            </div>
-        </div>
-
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
         <script>
-            function closeBannedModal() {
-                document.getElementById('bannedModal').style.display = 'none';
+            tailwind.config = {
+                darkMode: 'class',
             }
         </script>
-    @endif
-</body>
 
-</html>
+        <style>
+            html,
+            body {
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
+
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
+    </head>
+
+    <body
+        x-data="{ searchQuery: '', products: {{ json_encode($trendingProducts->merge($moreProducts)->unique('id')->map(function ($product) {
+    return ['id' => $product->id, 'name' => $product->name, 'description' => $product->description ?? 'No description available.', 'price' => number_format($product->price) . ' MMK', 'stock' => $product->stock, 'image' => $product->image ? asset('storage/' . $product->image) : '', 'url' => route('products.show', $product->id)]; })) }}, trendingProducts: {{ json_encode($trendingProducts->map(function ($product) {
+    return ['id' => $product->id, 'name' => $product->name, 'description' => $product->description ?? 'No description available.', 'price' => number_format($product->price) . ' MMK', 'stock' => $product->stock, 'image' => $product->image ? asset('storage/' . $product->image) : '', 'url' => route('products.show', $product->id)]; })) }}, moreProducts: {{ json_encode($moreProducts->map(function ($product) {
+    return ['id' => $product->id, 'name' => $product->name, 'description' => $product->description ?? 'No description available.', 'price' => number_format($product->price) . ' MMK', 'stock' => $product->stock, 'image' => $product->image ? asset('storage/' . $product->image) : '', 'url' => route('products.show', $product->id)]; })) }}, get filteredProducts() { if (this.searchQuery.trim() === '') { return []; } return this.products.filter(p => p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) || p.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ); } }"
+        @product-search.window="searchQuery = $event.detail"
+        class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen pb-24 relative overflow-x-hidden">
+
+        <main class="max-w-7xl mx-auto px-4 pt-10 pb-36 font-sans" x-data="{ 
+                  chunkSize: window.innerWidth < 640 ? 3 : 6,
+                  init() {
+                      window.addEventListener('resize', () => {
+                          this.chunkSize = window.innerWidth < 640 ? 3 : 6;
+                      });
+                  }
+              }">
+              
+            @guest
+            <div class="mb-10 relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 text-white rounded-2xl shadow-xl border border-white/10 transform transition-all duration-300 hover:scale-[1.01]">
+                <!-- Background Decorative Blobs -->
+                <div class="absolute top-0 right-0 -mt-6 -mr-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 -mb-6 -ml-6 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="px-6 py-8 sm:p-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 relative z-10">
+                    <div class="space-y-2 max-w-2xl">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-white backdrop-blur-sm tracking-wide uppercase">
+                            🚀 Become a Seller
+                        </span>
+                        <h2 class="text-xl sm:text-2xl font-black tracking-tight leading-tight">
+                            ယခုပဲ Account ဖွင့်ပြီး သင့်ပစ္စည်းများကို စတင်ရောင်းချလိုက်ပါ!
+                        </h2>
+                        <!-- 💡 text-white ဖြစ်အောင် ပြောင်းလဲထားပြီး စာသားကို လင်းထိန်သွားစေပါသည် -->
+                        <p class="text-xs sm:text-sm text-white leading-relaxed font-medium">
+                            ရိုးရှင်းလွယ်ကူတဲ့ Register အဆင့်ဆင့်ကို ဖြည့်စွက်ပြီးတာနဲ့ သာမန်ဝယ်ယူသူအဆင့်မှတစ်ဆင့် နောင်တွင် ကိုယ်ပိုင်ဆိုင်ခန်းဖွင့်လှစ်ပြီး <span class="text-yellow-300 font-extrabold">Vendor (အရောင်းဆိုင်ရှင်)</span> တစ်ဦးအဖြစ်ပါ တိုးမြှင့်လုပ်ဆောင်နိုင်ခွင့် ရရှိလာမှာဖြစ်ပါတယ်။
+                        </p>
+                    </div>
+                    
+                    <!-- <div class="flex items-center gap-3 shrink-0">
+                        <a href="{{ route('register') }}" 
+                           class="px-5 py-3 text-xs sm:text-sm font-extrabold bg-white text-indigo-700 hover:bg-blue-50 hover:text-blue-800 rounded-xl shadow-lg transition-all duration-200 active:scale-95 text-center w-full sm:w-auto">
+                            Register လုပ်ရန်
+                        </a>
+                        <a href="{{ route('login') }}" 
+                           class="px-5 py-3 text-xs sm:text-sm font-bold bg-transparent border border-white/40 hover:bg-white/10 rounded-xl transition-all duration-200 text-center w-full sm:w-auto">
+                            Sign In
+                        </a>
+                    </div> -->
+                </div>
+            </div>
+            @endguest
+
+            <!-- ==================== (၁) SEARCH RESULTS SECTION ==================== -->
+            <template x-if="searchQuery.trim() !== ''">
+                <div>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-extrabold text-gray-800 dark:text-white tracking-wide">
+                            Search Results for '<span x-text="searchQuery" class="text-blue-600"></span>'
+                        </h3>
+                    </div>
+
+                    <!-- Search Results Loop -->
+                    <template
+                        x-for="(rowProducts, rowIndex) in Array.from({ length: Math.ceil(filteredProducts.length / chunkSize) }, (_, i) => filteredProducts.slice(i * chunkSize, (i + 1) * chunkSize))"
+                        :key="'search-row-' + rowIndex">
+                        <div class="relative px-2 sm:px-12 pt-6 pb-20 mb-12">
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-x-2 sm:gap-x-6 relative z-10 w-full">
+                                <template x-for="product in rowProducts" :key="'search-' + product.id">
+                                    <div class="relative h-24 sm:h-44 w-full flex flex-col items-center group">
+                                        <!-- 💡 group ခံထားဆဲဖြစ်သည် -->
+
+                                        <!-- 📦 Product Image Container -->
+                                        <!-- 💡 group-hover: လှုပ်ရှားမှုကို ဤ Image ဘောင်တစ်ခုတည်းတွင်သာ ထည့်သွင်းထားသဖြင့် မည်သည့်နေရာကို cursor တင်တင် ပုံပဲ လှုပ်မည် -->
+                                        <a :href="product.url"
+                                            class="absolute bottom-[-25px] sm:bottom-[16px] w-20 sm:w-36 h-16 sm:h-36 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-0.5 sm:p-1 overflow-hidden shadow-md transform transition-all duration-300 group-hover:-translate-y-1 sm:group-hover:-translate-y-2 z-10">
+                                            <div
+                                                class="absolute inset-0 p-[1px] sm:p-[1.5px] bg-gradient-to-tr from-pink-500 via-purple-500 via-cyan-500 to-yellow-400 rounded-lg sm:rounded-xl opacity-100">
+                                                <div
+                                                    class="w-full h-full bg-white dark:bg-gray-800 rounded-[7px] sm:rounded-[10px] flex items-center justify-center p-1 sm:p-2">
+                                                    <template x-if="product.image">
+                                                        <img :src="product.image" :alt="product.name"
+                                                            class="max-w-full max-h-full object-contain">
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </a>
+
+                                        <!-- 🏷️ Price Tag (<a> link ဖြစ်ပြီး transform / hover animation ကုဒ်များ ဖြုတ်ထားသဖြင့် လုံးဝ မလှုပ်ဘဲ ငြိမ်နေမည်) -->
+                                        <a :href="product.url"
+                                            class="absolute bottom-[-65px] sm:bottom-[-48px] w-[90%] sm:w-[85%] h-6 sm:h-12 bg-white border border-gray-200 shadow-md rounded flex flex-col justify-center items-center leading-none sm:leading-tight px-0.5 z-20">
+                                            <div class="text-[7px] sm:text-[10px] font-extrabold text-gray-800 truncate w-full text-center"
+                                                x-text="product.name"></div>
+                                            <div class="text-[8px] sm:text-[11px] font-black text-red-600 tracking-tight"
+                                                x-text="product.price"></div>
+                                        </a>
+
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- 🪵 🌈 3D RAINBOW SHELF COMPONENT -->
+                            <div class="absolute bottom-6 sm:bottom-12 left-0 right-0 z-0 [perspective:1000px]">
+                                <div
+                                    class="w-full h-10 sm:h-20 bg-gradient-to-r from-red-500/80 via-yellow-500/80 via-green-500/80 via-blue-500/80 to-purple-500/80 shadow-inner border-t border-white/30 [transform:rotateX(55deg)] rounded-t-sm origin-bottom">
+                                </div>
+                                <div
+                                    class="w-full h-4 sm:h-8 bg-gradient-to-r from-red-600 via-yellow-600 via-green-600 via-blue-600 to-purple-600 border-t border-white/20 shadow-lg rounded-b-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="filteredProducts.length === 0" class="text-center py-12 text-gray-400">
+                        <span>No products found</span>
+                    </div>
+                </div>
+            </template>
+
+
+            <!-- ==================== (၂) REGULAR PRODUCTS DISPLAY ==================== -->
+            <template x-if="searchQuery.trim() === ''">
+                <div class="space-y-6 sm:space-y-12">
+
+                    <!-- 🔥 ROW 1: TRENDING PRODUCTS SECTION -->
+                    <div class="relative">
+                        <div class="mb-4 border-b-2 border-gray-200 dark:border-gray-700/50 pb-2">
+                            <h3
+                                class="text-lg sm:text-xl font-black text-gray-800 dark:text-white tracking-wider uppercase flex items-center gap-2">
+                                <span class="w-2 h-5 sm:w-2.5 sm:h-6 bg-red-500 rounded-full inline-block"></span>
+                                Trending Products
+                            </h3>
+                        </div>
+
+                        <template
+                            x-for="(rowProducts, rowIndex) in Array.from({ length: Math.ceil(trendingProducts.length / chunkSize) }, (_, i) => trendingProducts.slice(i * chunkSize, (i + 1) * chunkSize))"
+                            :key="'trending-row-' + rowIndex">
+                            <div class="relative px-2 sm:px-12 pt-6 pb-20 mb-4 sm:mb-8">
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-x-2 sm:gap-x-6 relative z-10 w-full">
+                                    <template x-for="product in rowProducts" :key="'trending-' + product.id">
+                                        <div class="relative h-24 sm:h-44 w-full flex flex-col items-center group">
+                                            <!-- 💡 group ခံထားဆဲဖြစ်သည် -->
+
+                                            <!-- 📦 Product Image Container -->
+                                            <!-- 💡 group-hover: လှုပ်ရှားမှုကို ဤ Image ဘောင်တစ်ခုတည်းတွင်သာ ထည့်သွင်းထားသဖြင့် မည်သည့်နေရာကို cursor တင်တင် ပုံပဲ လှုပ်မည် -->
+                                            <a :href="product.url"
+                                                class="absolute bottom-[-25px] sm:bottom-[16px] w-20 sm:w-36 h-16 sm:h-36 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-0.5 sm:p-1 overflow-hidden shadow-md transform transition-all duration-300 group-hover:-translate-y-1 sm:group-hover:-translate-y-2 z-10">
+                                                <div
+                                                    class="absolute inset-0 p-[1px] sm:p-[1.5px] bg-gradient-to-tr from-pink-500 via-purple-500 via-cyan-500 to-yellow-400 rounded-lg sm:rounded-xl opacity-100">
+                                                    <div
+                                                        class="w-full h-full bg-white dark:bg-gray-800 rounded-[7px] sm:rounded-[10px] flex items-center justify-center p-1 sm:p-2">
+                                                        <template x-if="product.image">
+                                                            <img :src="product.image" :alt="product.name"
+                                                                class="max-w-full max-h-full object-contain">
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </a>
+
+                                            <!-- 🏷️ Price Tag (<a> link ဖြစ်ပြီး transform / hover animation ကုဒ်များ ဖြုတ်ထားသဖြင့် လုံးဝ မလှုပ်ဘဲ ငြိမ်နေမည်) -->
+                                            <a :href="product.url"
+                                                class="absolute bottom-[-65px] sm:bottom-[-48px] w-[90%] sm:w-[85%] h-6 sm:h-12 bg-white border border-gray-200 shadow-md rounded flex flex-col justify-center items-center leading-none sm:leading-tight px-0.5 z-20">
+                                                <div class="text-[7px] sm:text-[10px] font-extrabold text-gray-800 truncate w-full text-center"
+                                                    x-text="product.name"></div>
+                                                <div class="text-[8px] sm:text-[11px] font-black text-red-600 tracking-tight"
+                                                    x-text="product.price"></div>
+                                            </a>
+
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- 🪵 🌈 စင်ပုံစံအပြား -->
+                                <div class="absolute bottom-6 sm:bottom-12 left-0 right-0 z-0 [perspective:1000px]">
+                                    <div
+                                        class="w-full h-10 sm:h-20 bg-gradient-to-r from-red-500/80 via-yellow-500/80 via-green-500/80 via-blue-500/80 to-purple-500/80 shadow-inner border-t border-white/30 [transform:rotateX(55deg)] rounded-t-sm origin-bottom">
+                                    </div>
+                                    <div
+                                        class="w-full h-4 sm:h-8 bg-gradient-to-r from-red-600 via-yellow-600 via-green-600 via-blue-600 to-purple-600 border-t border-white/20 shadow-lg rounded-b-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- 🌿 ROW 2: MORE PRODUCTS SECTION -->
+                    <div class="relative">
+                        <div class="mb-4 border-b-2 border-gray-200 dark:border-gray-700/50 pb-2">
+                            <h3
+                                class="text-lg sm:text-xl font-black text-gray-800 dark:text-white tracking-wider uppercase flex items-center gap-2">
+                                <span class="w-2 h-5 sm:w-2.5 sm:h-6 bg-blue-500 rounded-full inline-block"></span>
+                                More Products
+                            </h3>
+                        </div>
+
+                        <template
+                            x-for="(rowProducts, rowIndex) in Array.from({ length: Math.ceil(moreProducts.length / chunkSize) }, (_, i) => moreProducts.slice(i * chunkSize, (i + 1) * chunkSize))"
+                            :key="'more-row-' + rowIndex">
+                            <div class="relative px-2 sm:px-12 pt-6 pb-20 mb-4 sm:mb-8">
+                                <div class="grid grid-cols-3 sm:grid-cols-6 gap-x-2 sm:gap-x-6 relative z-10 w-full">
+                                    <template x-for="product in rowProducts" :key="'more-' + product.id">
+                                        <div class="relative h-24 sm:h-44 w-full flex flex-col items-center group">
+                                            <!-- 💡 group ခံထားဆဲဖြစ်သည် -->
+
+                                            <!-- 📦 Product Image Container -->
+                                            <!-- 💡 group-hover: လှုပ်ရှားမှုကို ဤ Image ဘောင်တစ်ခုတည်းတွင်သာ ထည့်သွင်းထားသဖြင့် မည်သည့်နေရာကို cursor တင်တင် ပုံပဲ လှုပ်မည် -->
+                                            <a :href="product.url"
+                                                class="absolute bottom-[-25px] sm:bottom-[16px] w-20 sm:w-36 h-16 sm:h-36 bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-0.5 sm:p-1 overflow-hidden shadow-md transform transition-all duration-300 group-hover:-translate-y-1 sm:group-hover:-translate-y-2 z-10">
+                                                <div
+                                                    class="absolute inset-0 p-[1px] sm:p-[1.5px] bg-gradient-to-tr from-pink-500 via-purple-500 via-cyan-500 to-yellow-400 rounded-lg sm:rounded-xl opacity-100">
+                                                    <div
+                                                        class="w-full h-full bg-white dark:bg-gray-800 rounded-[7px] sm:rounded-[10px] flex items-center justify-center p-1 sm:p-2">
+                                                        <template x-if="product.image">
+                                                            <img :src="product.image" :alt="product.name"
+                                                                class="max-w-full max-h-full object-contain">
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </a>
+
+                                            <!-- 🏷️ Price Tag (<a> link ဖြစ်ပြီး transform / hover animation ကုဒ်များ ဖြုတ်ထားသဖြင့် လုံးဝ မလှုပ်ဘဲ ငြိမ်နေမည်) -->
+                                            <a :href="product.url"
+                                                class="absolute bottom-[-65px] sm:bottom-[-48px] w-[90%] sm:w-[85%] h-6 sm:h-12 bg-white border border-gray-200 shadow-md rounded flex flex-col justify-center items-center leading-none sm:leading-tight px-0.5 z-20">
+                                                <div class="text-[7px] sm:text-[10px] font-extrabold text-gray-800 truncate w-full text-center"
+                                                    x-text="product.name"></div>
+                                                <div class="text-[8px] sm:text-[11px] font-black text-red-600 tracking-tight"
+                                                    x-text="product.price"></div>
+                                            </a>
+
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- 🪵 🌈 စင်ပုံစံအပြား -->
+                                <div class="absolute bottom-6 sm:bottom-12 left-0 right-0 z-0 [perspective:1000px]">
+                                    <div
+                                        class="w-full h-10 sm:h-20 bg-gradient-to-r from-red-500/80 via-yellow-500/80 via-green-500/80 via-blue-500/80 to-purple-500/80 shadow-inner border-t border-white/30 [transform:rotateX(55deg)] rounded-t-sm origin-bottom">
+                                    </div>
+                                    <div
+                                        class="w-full h-4 sm:h-8 bg-gradient-to-r from-red-600 via-yellow-600 via-green-600 via-blue-600 to-purple-600 border-t border-white/20 shadow-lg rounded-b-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                </div>
+            </template>
+        </main>
+    </body>
+
+    </html>
+</x-app-layout>
+*/ ?>

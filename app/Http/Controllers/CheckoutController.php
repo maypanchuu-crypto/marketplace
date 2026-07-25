@@ -12,232 +12,163 @@ use Illuminate\Support\Facades\DB;
 use App\Models\QrTransaction;
 use Illuminate\Support\Str;
 use App\Models\Wallet;
+use Illuminate\Support\Facades\Cookie;
 
 class CheckoutController extends Controller
 {
-    // ၁။ Checkout Page (Random OTP ထုတ်ပြီး Form ပြသရန်)
+    // 💡 Cookie ထဲမှ Cart Data များကို လှမ်းယူသည့် Helper Function
+    private function getCartFromCookie()
+    {
+        return json_decode(Cookie::get('shopping_cart', '[]'), true);
+    }
+
+    // ၁။ Checkout Page
     public function index()
     {
-        $cart = session()->get('cart', []);
-        if (empty($cart)) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
-        }
+        $cart = $this->getCartFromCookie();
 
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
+        $total = array_reduce($cart, function ($sum, $item) {
+            return $sum + ($item['price'] * $item['quantity']);
+        }, 0);
 
-        // 🌟 စာမျက်နှာဖွင့်ကတည်းက Random OTP ကို ထုတ်ပြီး Session ထဲ တစ်ခါတည်း သိမ်းထားမည်
-        $randomOtp = rand(1000, 9999);
-        session()->put('demo_otp', $randomOtp);
-
-        return view('checkout.index', compact('cart', 'total', 'randomOtp'));
+        return view('checkout', compact('cart', 'total'));
     }
 
-    // ၂။ "Pay Now" နှိပ်ပြီး Random OTP ကို စစ်ဆေးကာ ငွေဖြတ်မည့်နေရာ
-    public function placeOrder(Request $request)
+    // ၂။ QR Code Payment Create လုပ်သည့်နေရာ (QR ပေါ်ရုံဖြင့် Cart မဖျက်ပါ)
+    public function createQrPayment(Request $request)
     {
-        $cart = session()->get('cart', []);
-        if (empty($cart))
-            return redirect()->route('cart.index');
+        $user = Auth::user();
+        $cart = $this->getCartFromCookie();
 
-        // Session ထဲတွင် သိမ်းထားခဲ့သော OTP အမှန်ကို လှမ်းယူခြင်း
-        $correctOtp = session()->get('demo_otp');
+        // Cart ထဲမှာ ဘာမှမရှိပါက Order တင်ခွင့်မပြုပါ
+        if (empty($cart)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cart ထဲတွင် ပစ္စည်းများ မရှိပါ။'
+            ], 400);
+        }
 
-        // Validation စစ်ဆေးခြင်း
-        $request->validate([
-            'customer_name' => 'required|string|max:255',
-            // 🌟 သုတ မေးထားသည့်အတိုင်း ဖုန်းနံပါတ် ဂဏန်း ၈ လုံးမှ ၁၁ လုံးအတွင်း စစ်ဆေးခြင်း
-            'customer_phone' => 'required|digits_between:8,11',
-            'shipping_address' => 'required|string',
-            'payment_method' => 'required|string',
-            'otp_code' => 'required|numeric',
+        $total = 0;
+        $vendorId = null;
+
+        foreach ($cart as $id => $item) {
+            $product = Product::find($item['product_id'] ?? $id);
+            if ($product) {
+                $total += $item['price'] * $item['quantity'];
+                $vendorId = $product->user_id;
+            }
+        }
+
+        $commission = $total * 0.05;
+        $vendorAmount = $total - $commission;
+
+        $txId = 'TXN_' . Str::uuid();
+
+        // Order သို့မဟုတ် QrTransaction Create လုပ်မည်
+        $tx = QrTransaction::create([
+            'tx_id' => $txId,
+            'buyer_id' => $user->id,
+            'vendor_id' => $vendorId,
+            'amount' => $total,
+            'commission_amount' => $commission,
+            'vendor_amount' => $vendorAmount,
+            'status' => 'generated',
+            'expires_at' => now()->addMinutes(10),
         ]);
 
-        // 🌟 CRITICAL CHECK: User ရိုက်လိုက်သည့် OTP နှင့် Session ထဲက Random OTP တူ/မတူ စစ်ခြင်း
-        if ($request->otp_code != $correctOtp) {
-            return back()->withErrors(['otp_code' => 'Invalid OTP Code! Please check the demo popup again.'])->withInput();
+        // ဖုန်းဖြင့် Scan ဖတ်ရန် Local Network IP Address ဖြင့် URL ပြုလုပ်ခြင်း
+        $paymentUrl = "http://192.168.100.242:8000/wallet/pay/" . $txId;
+
+        // 💡 ဤနေရာတွင် Cookie::forget ကို မလုပ်ထားသည့်အတွက် Cart ပျောက်မသွားပါ
+        return response()->json([
+            'status' => 'success',
+            'tx_id' => $txId,
+            'amount' => $total,
+            'qr' => 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' . urlencode($paymentUrl)
+        ]);
+    }
+
+    // ၃။ ဖုန်းမှ QR Scan ဖတ်ပြီး ငွေပေးချေမှုကို အတည်ပြုသည့်နေရာ
+    public function scanQr(Request $request)
+    {
+        $request->validate([
+            'tx_id' => 'required|string'
+        ]);
+
+        $tx = QrTransaction::where('tx_id', $request->tx_id)->first();
+
+        if (!$tx) {
+            return response()->json(['error' => 'Invalid QR'], 404);
         }
 
-        // စုစုပေါင်း ကျသင့်ငွေ တွက်ချက်ခြင်း
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
+        // Double payment ကာကွယ်ခြင်း
+        if ($tx->status == 'completed') {
+            return response()->json(['error' => 'Already paid'], 400);
         }
 
-        // Transaction စတင်ပြီး ပိုက်ဆံတိုက်ရိုက်ခွဲဝေကာ status ကို 'completed' ပေးမည်
-        DB::transaction(function () use ($request, $cart, $total) {
+        // QR Expired ဖြစ်မဖြစ် စစ်ဆေးခြင်း
+        if ($tx->expires_at && now()->gt($tx->expires_at)) {
+            $tx->update(['status' => 'expired']);
+            return response()->json(['error' => 'QR expired'], 400);
+        }
 
-            // Orders Table ထဲသို့ status 'completed' ဖြင့် တိုက်ရိုက်သွင်းခြင်း
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'total_amount' => $total,
-                'status' => 'completed', // Admin အတည်ပြုစရာမလိုဘဲ တန်းပြီး Completed ဖြစ်သွားမည်
-                'customer_name' => $request->customer_name,
-                'customer_phone' => $request->customer_phone,
-                'shipping_address' => $request->shipping_address,
-                'payment_slip' => null
+        // Processing ပြောင်းမည်
+        $tx->update(['status' => 'processing']);
+
+        DB::transaction(function () use ($tx) {
+            $adminId = 1; // System Admin
+
+            // Wallet များကို ရှာဖွေ/ဖန်တီးမည်
+            $vendorWallet = Wallet::firstOrCreate(['user_id' => $tx->vendor_id]);
+            $adminWallet = Wallet::firstOrCreate(['user_id' => $adminId]);
+
+            // Vendor Credit တိုးပေးခြင်း
+            $vendorWallet->balance += $tx->vendor_amount;
+            $vendorWallet->save();
+
+            $vendorWallet->transactions()->create([
+                'type' => 'credit',
+                'amount' => $tx->vendor_amount,
+                'reference_type' => 'qr_payment',
+                'reference_id' => $tx->tx_id,
             ]);
 
-            $commissionRate = 0.05; // Admin ကော်မရှင် ၅%
+            // Admin Commission တိုးပေးခြင်း
+            $adminWallet->balance += $tx->commission_amount;
+            $adminWallet->save();
 
-            // ဝယ်လိုက်သော ပစ္စည်းတစ်ခုချင်းစီကို OrderItems ထဲသွင်းပြီး Vendor ဆီ ပိုက်ဆံ တန်းခွဲပေးခြင်း
-            foreach ($cart as $id => $details) {
-                $product = Product::find($details['product_id'] ?? $id);
+            $adminWallet->transactions()->create([
+                'type' => 'credit',
+                'amount' => $tx->commission_amount,
+                'reference_type' => 'qr_payment',
+                'reference_id' => $tx->tx_id,
+            ]);
 
-                $itemTotal = $details['price'] * $details['quantity'];
-                $commission = $itemTotal * $commissionRate;
-                $vendorAmount = $itemTotal - $commission;
+            // Transaction Status ကို Completed ဟု ပြောင်းမည်
+            $tx->update(['status' => 'completed']);
 
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'vendor_id' => $product->user_id,
-                    'quantity' => $details['quantity'],
-                    'color' => $details['color'] ?? null,
-                    'size' => $details['size'] ?? null,
-                    'price' => $details['price'],
-                    'admin_commission' => $commission,
-                    'vendor_amount' => $vendorAmount
-                ]);
-
-                // Vendor ၏ Balance အကောင့်ထဲသို့ ပိုက်ဆံ တိုက်ရိုက် တိုးပေးခြင်း
-                $vendor = User::find($product->user_id);
-                if ($vendor) {
-                    $vendor->increment('balance', $vendorAmount);
-                }
-            }
-
-            // အော်ဒါအောင်မြင်သွားသဖြင့် သုံးပြီးသား OTP ရော Cart ရော ရှင်းလင်းပစ်ခြင်း
-            session()->forget(['cart', 'demo_otp']);
+            // 💡 ငွေပေးချေမှု အောင်မြင်မှသာ Cookie ထဲမှ Cart ကို ရှင်းထုတ်မည်
+            Cookie::queue(Cookie::forget('shopping_cart'));
         });
 
-        return redirect()->route('dashboard')->with('success', 'Payment Successful! Your order has been placed and paid via Mobile Wallet.');
-    }
-public function createQrPayment(Request $request)
-{
-    $user = Auth::user();
-
-    $cart = session()->get('cart', []);
-    if (empty($cart)) {
-        return response()->json(['error' => 'Cart is empty'], 400);
-    }
-
-    $total = 0;
-    $vendorId = null;
-
-    foreach ($cart as $id => $item) {
-        $product = Product::find($item['product_id'] ?? $id);
-        $total += $item['price'] * $item['quantity'];
-        $vendorId = $product->user_id;
-    }
-
-    $commission = $total * 0.05;
-    $vendorAmount = $total - $commission;
-
-    $txId = 'TXN_' . Str::uuid();
-
-    $tx = QrTransaction::create([
-        'tx_id' => $txId,
-        'buyer_id' => $user->id,
-        'vendor_id' => $vendorId,
-        'amount' => $total,
-        'commission_amount' => $commission,
-        'vendor_amount' => $vendorAmount,
-        'status' => 'generated',
-        'expires_at' => now()->addMinutes(5),
-    ]);
-
-    // 🟢 SIMPLE DEMO QR (NO PACKAGE REQUIRED)
-    $qrData = json_encode([
-        'tx_id' => $txId,
-        'amount' => $total
-    ]);
-
-    return response()->json([
-    'tx_id' => $txId,
-    'amount' => $total,
-    'qr' => 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($txId)
-]);
-}
-public function scanQr(Request $request)
-{
-    $request->validate([
-        'tx_id' => 'required|string'
-    ]);
-
-    $tx = QrTransaction::where('tx_id', $request->tx_id)->first();
-
-    if (!$tx) {
-        return response()->json(['error' => 'Invalid QR'], 404);
-    }
-
-    // ❌ prevent double payment
-    if ($tx->status == 'completed') {
-        return response()->json(['error' => 'Already paid'], 400);
-    }
-
-    // ❌ expired check
-    if ($tx->expires_at && now()->gt($tx->expires_at)) {
-        $tx->update(['status' => 'expired']);
-        return response()->json(['error' => 'QR expired'], 400);
-    }
-
-    // mark processing
-    $tx->update(['status' => 'processing']);
-
-    DB::transaction(function () use ($tx) {
-
-        $adminId = 1; // system admin
-
-        // wallets
-        $vendorWallet = Wallet::firstOrCreate(['user_id' => $tx->vendor_id]);
-        $adminWallet = Wallet::firstOrCreate(['user_id' => $adminId]);
-
-        // 💰 vendor credit
-        $vendorWallet->balance += $tx->vendor_amount;
-        $vendorWallet->save();
-
-        $vendorWallet->transactions()->create([
-            'type' => 'credit',
-            'amount' => $tx->vendor_amount,
-            'reference_type' => 'qr_payment',
-            'reference_id' => $tx->tx_id,
+        return response()->json([
+            'message' => 'Payment successful',
+            'tx_id' => $tx->tx_id
         ]);
-
-        // 💰 admin commission
-        $adminWallet->balance += $tx->commission_amount;
-        $adminWallet->save();
-
-        $adminWallet->transactions()->create([
-            'type' => 'credit',
-            'amount' => $tx->commission_amount,
-            'reference_type' => 'qr_payment',
-            'reference_id' => $tx->tx_id,
-        ]);
-
-        // mark completed
-        $tx->update(['status' => 'completed']);
-    });
-
-    return response()->json([
-        'message' => 'Payment successful',
-        'tx_id' => $tx->tx_id
-    ]);
-}
-
-public function checkQrStatus($tx_id)
-{
-    $tx = QrTransaction::where('tx_id', $tx_id)->first();
-
-    if (!$tx) {
-        return response()->json(['status' => 'invalid']);
     }
 
-    return response()->json([
-        'status' => $tx->status,
-        'amount' => $tx->amount
-    ]);
-}
+    // ၄။ QR Code Payment Status စစ်ပေးသည့် API
+    public function checkQrStatus($tx_id)
+    {
+        $tx = QrTransaction::where('tx_id', $tx_id)->first();
+
+        if (!$tx) {
+            return response()->json(['status' => 'invalid']);
+        }
+
+        return response()->json([
+            'status' => $tx->status,
+            'amount' => $tx->amount
+        ]);
+    }
 }

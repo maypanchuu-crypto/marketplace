@@ -12,7 +12,10 @@ use App\Http\Controllers\Vendor\VendorWalletController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\UserManagementController;
-
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\WalletPaymentController;
+use App\Models\Order;
+use App\Http\Controllers\WalletController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -24,9 +27,10 @@ use App\Http\Controllers\Admin\UserManagementController;
 |
 */
 
-Route::get('/', function () {
-    return view('dashboard');
-});
+Route::get('/', [ProductController::class, 'index'])->name('home');
+
+
+
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -35,16 +39,7 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     // for all authenticated users
     Route::get('/dashboard', [ProductController::class, 'index'])->name('dashboard');
-    Route::get('/messages', function () {
-        return view('message'); 
-    })->name('message.index');
 
-    // //only for customer
-    // Route::middleware(['role:customer'])->group(function () {
-    //     Route::get('/dashboard', function () {
-    //         return view('dashboard');
-    //     })->name('dashboard');
-    // });
 
     // for admin only
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -104,24 +99,56 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // for Product Detail 
-    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
-
     // Vendor Registration Routes
     Route::get('/vendor-register', [VendorRegistrationController::class, 'index'])->name('vendor.register');
     Route::post('/vendor-register', [VendorRegistrationController::class, 'register'])->name('vendor.register.submit');
+
+    // for Product Detail 
+    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::patch('/update-cart', [CartController::class, 'updateCart'])->name('cart.update');
+    Route::delete('/remove-from-cart', [CartController::class, 'removeCart'])->name('cart.remove');
+
+    // Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    // Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+    // Route::post('/checkout/qr-payment', [CheckoutController::class, 'createQrPayment']);
+    // Route::post('/qr/scan', [CheckoutController::class, 'scanQr']);
+    // Route::get('/qr/status/{tx_id}', [CheckoutController::class, 'checkQrStatus']);
+
+    // Checkout Routes
+    Route::get('/checkout', [OrderController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/place-order', [OrderController::class, 'placeOrder'])->name('checkout.placeOrder');
+
+    // Mobile Scan & Wallet Routes
+    // Route::get('/wallet/pay/{orderId}', function ($orderId) {
+    //     $order = \App\Models\Order::findOrFail($orderId);
+    //     $order->update(['status' => 'paid']);
+
+    //     return "Order #{$orderId} အတွက် ငွေပေးချေမှု အောင်မြင်ပါသည်။";
+    // })->name('wallet.pay');
+
+    Route::get('/api/check-order-status/{id}', function ($id) {
+        $order = Order::find($id);
+        return response()->json([
+            'status' => $order ? $order->status : 'not_found'
+        ]);
+    });
+
+    // Wallet Password ပြောင်းရန် Page & Action
+    Route::get('/wallet/password/edit', [WalletController::class, 'editPassword'])->name('wallet.password.edit');
+    Route::put('/wallet/password/update', [WalletController::class, 'updatePassword'])->name('wallet.password.update');
 });
 
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/add-to-cart/{id}', [CartController::class, 'addToCart'])->name('cart.add');
-Route::patch('/update-cart', [CartController::class, 'updateCart'])->name('cart.update');
-Route::delete('/remove-from-cart', [CartController::class, 'removeCart'])->name('cart.remove');
+Route::get('/wallet/pay/{orderId}', function ($orderId) {
+    $order = \App\Models\Order::findOrFail($orderId);
+    $order->update(['status' => 'paid']);
 
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
-Route::post('/checkout/qr-payment', [CheckoutController::class, 'createQrPayment']);
-Route::post('/qr/scan', [CheckoutController::class, 'scanQr']);
-Route::get('/qr/status/{tx_id}', [CheckoutController::class, 'checkQrStatus']);
+    return "Order #{$orderId} အတွက် ငွေပေးချေမှု အောင်မြင်ပါသည်။";
+})->name('wallet.pay');
+
+
 
 
 require __DIR__ . '/auth.php';

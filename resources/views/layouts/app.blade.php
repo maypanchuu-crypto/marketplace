@@ -1,4 +1,4 @@
-@props(['hideNav' => false, 'hideSearch' => false])
+@props(['hideNav' => false, 'hideSearch' => false, 'messageIcon' => false, 'cartIcon' => false, 'logo' => false, 'menuBtn' => false, 'hideRoleMenu' => false, 'hideDropdown' => false, 'hideDarkMode' => false])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -15,6 +15,21 @@
             darkMode: 'class',
         }
     </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Firefox, IE နှင့် Edge အတွက် */
+        html,
+        body {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+    </style>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -33,13 +48,13 @@
         @endif
 
         <!-- Page Heading -->
-        @if (isset($header))
+        <!-- @if (isset($header))
             <header class="bg-white dark:bg-gray-800 shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
             </header>
-        @endif
+        @endif -->
 
         <!-- Page Content -->
         <main>

@@ -19,19 +19,6 @@
 
 <body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen pb-24 relative">
 
-    <nav
-        class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b dark:border-gray-700">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('vendor.dashboard') }}"
-                class="text-gray-600 dark:text-gray-300 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-            </a>
-            <h2 class="text-base font-bold tracking-wide">Add Product</h2>
-        </div>        
-    </nav>
-
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden"></div>
     <div id="sidebar"
         class="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 p-5 flex flex-col justify-between">

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\Wallet;
 
 class RegisteredUserController extends Controller
 {
@@ -32,22 +33,22 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            
+
             // ၁။ 📬 Email ကို ပိုမိုတိကျစေရန် regex (Regular Expression) ဖြင့် စစ်ဆေးခြင်း
             'email' => [
-                'required', 
-                'string', 
-                'lowercase', 
-                'max:255', 
-                'unique:'.User::class,
+                'required',
+                'string',
+                'lowercase',
+                'max:255',
+                'unique:' . User::class,
                 // regex က name@domain.com / .net / .org ပုံစံမျိုး မှန်ကန်မှသာ လက်ခံပါမည်
                 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/'
             ],
-            
+
             // ၂။ 🔐 Password ကို အနည်းဆုံး ၈ လုံး + စာလုံး + နံပါတ် + သင်္ကေတ ပါဝင်အောင် စစ်ဆေးခြင်း
             'password' => [
-                'required', 
-                'confirmed', 
+                'required',
+                'confirmed',
                 Rules\Password::min(8) // အနည်းဆုံး ၈ လုံး
                     ->letters()        // စာလုံး (a-z, A-Z) ပါရမည်
                     ->numbers()        // နံပါတ် (0-9) ပါရမည်
@@ -61,16 +62,22 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        Wallet::create([
+            'user_id' => $user->id,
+            'balance' => 100000.00, // Starting Balance
+            'wallet_password' => Hash::make('123456'), // Default PIN / Password
+        ]);
+
         event(new Registered($user));
 
         Auth::login($user);
-        
+
         $user = auth()->user();
 
         if ($user->role === 'admin') {
             return redirect()->intended(route('admin.dashboard'));
-        } 
-        
+        }
+
         if ($user->role === 'vendor') {
             return redirect()->intended(route('vendor.dashboard'));
         }
